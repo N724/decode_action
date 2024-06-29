@@ -1,4 +1,4 @@
-//Sat Jun 29 2024 07:22:23 GMT+0000 (Coordinated Universal Time)
+//Sat Jun 29 2024 07:57:55 GMT+0000 (Coordinated Universal Time)
 //Base:https://github.com/echo094/decode-js
 //Modify:https://github.com/smallfawn/decode_action
 $("#submitBTN").click(function () {
