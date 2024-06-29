@@ -1,391 +1,702 @@
-//Sat Jun 29 2024 11:08:36 GMT+0000 (Coordinated Universal Time)
+//Sat Jun 29 2024 11:17:12 GMT+0000 (Coordinated Universal Time)
 //Base:https://github.com/echo094/decode-js
 //Modify:https://github.com/smallfawn/decode_action
-//Sat Jun 29 2024 10:47:45 GMT+0000 (Coordinated Universal Time)
-//Base:https://github.com/echo094/decode-js
-//Modify:https://github.com/smallfawn/decode_action
-const $ = new Env("\u6653\u6653\u4F18\u9009"),
-  ckName = "xxyx_data";
-$.appid = "";
-const Notify = 1,
-  notify = $.isNode() ? require("./sendNotify") : "";
-let envSplitor = ["@"];
-var userCookie = ($.isNode() ? process.env[ckName] : $.getdata(ckName)) || "";
-let userList = [],
-  userIdx = 0,
-  userCount = 0;
-$.is_debug = ($.isNode() ? process.env.IS_DEDUG : $.getdata("is_debug")) || "false";
-$.notifyList = [];
-$.notifyMsg = [];
-$.codeServer = ($.isNode() ? process.env.codeServer_address : $.getdata("@codeServer.address")) || "";
-$.codeOpen = ($.isNode() ? process.env.codeServer_open : $.getdata("@codeServer.open")) || "false";
-$.wxCode = $.codeOpen != "false" && $.codeServer && $.appid;
-async function main() {
-  try {
-    await getNotice();
-    $.log("\n================== \u4EFB\u52A1 ==================\n");
-    for (let _0x23c860 of userList) {
-      console.log("\uD83D\uDD37\u8D26\u53F7" + _0x23c860.index + " >> Start work");
-      console.log("\u968F\u673A\u5EF6\u8FDF" + _0x23c860.getRandomTime() + "ms");
-      let _0x1638c2 = await _0x23c860.getUserEnergy();
-      if (_0x23c860.ckStatus) {
-        await _0x23c860.signin();
-        let _0x18f577 = await _0x23c860.getTaskList();
-        _0x18f577 = _0x18f577.filter(_0x518878 => _0x518878.isCompleted == 0);
-        for (let _0x58cec7 of _0x18f577) {
-          for (let _0x358941 = 0; _0x358941 < _0x58cec7?.["dailyCount"]; _0x358941++) {
-            await _0x23c860.completeTask(_0x58cec7?.["taskId"]);
-            $.log(_0x58cec7?.["taskName"] + ":\u8C03\u7528\u6210\u529F!");
-          }
-        }
-        let _0x3029a8 = await _0x23c860.getUserEnergy(),
-          _0x4a2821 = await _0x23c860.getUserInfo();
-        $.title = "\u300C" + _0x4a2821?.["nick"] + "\u300D\u672C\u6B21\u8FD0\u884C\u5171\u83B7\u5F97" + (_0x3029a8 - _0x1638c2) + "\u80FD\u91CF";
-        _0x18f577 = await _0x23c860.getTaskList();
-        _0x18f577.map(_0x5e1dff => DoubleLog(_0x5e1dff.taskName + ":" + (_0x5e1dff.isCompleted == 1 ? "\u5DF2\u5B8C\u6210" : "\u672A\u5B8C\u6210")));
-      } else {
-        $.notifyMsg.push("\u274C\u8D26\u53F7" + _0x23c860.index + " >> Check ck error!");
-      }
-      $.notifyList.push({
-        id: _0x23c860.index,
-        avatar: _0x23c860.avatar,
-        message: $.notifyMsg
-      });
-      $.notifyMsg = [];
-    }
-  } catch (_0x5db4b7) {
-    $.log("\u274Cmain run error => " + _0x5db4b7);
-  }
-}
-class UserInfo {
-  constructor(_0x27213e) {
-    this.index = ++userIdx;
-    this.token = _0x27213e.token || _0x27213e;
-    this.userId = _0x27213e.userId;
-    this.userName = _0x27213e.userName;
-    this.avatar = _0x27213e.avatar;
-    this.ckStatus = true;
-    this.host = "https://xxyx-client-api.xiaoxiaoyouxuan.com";
-    this.baseUrl = "";
-    this.headers = {
-      "xx-platform": "ios",
-      Host: "xxyx-client-api.xiaoxiaoyouxuan.com",
-      "User-Agent": "XiaoXiaoYouXuan/20127 CFNetwork/1331.0.7 Darwin/21.4.0",
-      "xx-version": "20127",
-      "xx-token": this.token
-    };
-    this.getRandomTime = () => randomInt(1000, 3000);
-    this.fetch = async _0xda01b7 => {
-      try {
-        if (typeof _0xda01b7 === "string") {
-          _0xda01b7 = {
-            url: _0xda01b7
-          };
-        }
-        if (_0xda01b7?.["url"]["startsWith"]("/")) {
-          _0xda01b7.url = this.host + _0xda01b7.url;
-        }
-        const _0x18874b = {
-          ..._0xda01b7,
-          headers: _0xda01b7.headers || this.headers,
-          url: _0xda01b7.url || this.baseUrl
-        };
-        const _0x15b9df = await Request(_0x18874b);
-        debug(_0x15b9df, _0xda01b7?.["url"]?.["replace"](/\/+$/, "")["substring"](_0xda01b7?.["url"]?.["lastIndexOf"]("/") + 1));
-        if (_0x15b9df?.["code"] == 401) {
-          throw new Error("\u7528\u6237\u9700\u8981\u53BB\u767B\u5F55");
-        }
-        return _0x15b9df;
-      } catch (_0x11c343) {
-        this.ckStatus = false;
-        $.log("\u274C\u8BF7\u6C42\u53D1\u8D77\u5931\u8D25\uFF01" + _0x11c343);
-      }
-    };
-  }
-  async signin() {
-    try {
-      const _0x516f33 = {
-        url: "/client/energy/mall/signIn",
-        dataType: "json",
-        body: "{\"platform\":\"ios\"}"
-      };
-      return await this.fetch(_0x516f33);
-    } catch (_0x49c2bc) {
-      console.log("\u274C\u4EFB\u52A1\u5931\u8D25\uFF01\u539F\u56E0\u4E3A:" + _0x49c2bc);
-    }
-  }
-  async getTaskList() {
-    try {
-      let _0x31825b = await this.fetch("/client/energy/mall/getTaskList?platform=ios"),
-        _0xdfac7a = _0x31825b?.["data"]["filter"](_0x763ea1 => _0x763ea1.taskName.match(/每日签到|分享海报|观看视频/));
-      return _0xdfac7a;
-    } catch (_0x37dd6b) {
-      console.log("\u274C\u4EFB\u52A1\u5931\u8D25\uFF01\u539F\u56E0\u4E3A:" + _0x37dd6b);
-    }
-  }
-  async completeTask(_0x204464) {
-    try {
-      const _0x5bdae6 = {
-        url: "/client/energy/mall/completeTask/" + _0x204464,
-        dataType: "json",
-        body: "{\"taskId\":" + _0x204464 + ",\"platform\":\"ios\"}"
-      };
-      return await this.fetch(_0x5bdae6);
-    } catch (_0x464519) {
-      console.log("\u274C\u4EFB\u52A1\u5931\u8D25\uFF01\u539F\u56E0\u4E3A:" + _0x464519);
-    }
-  }
-  async getUserEnergy() {
-    try {
-      let _0x5c9714 = await this.fetch("/client/energy/mall/getUserEnergy?platform=ios");
-      return _0x5c9714?.["data"]?.["energy"];
-    } catch (_0x1cf0fa) {
-      console.log("\u274C\u4EFB\u52A1\u5931\u8D25\uFF01\u539F\u56E0\u4E3A:" + _0x1cf0fa);
-    }
-  }
-  async getUserInfo() {
-    try {
-      let _0x15e6ea = await this.fetch("/my?platform=ios");
-      this.avatar = _0x15e6ea?.["data"]?.["avatar"];
-      return _0x15e6ea?.["data"];
-    } catch (_0x51a20b) {
-      console.log("\u274C\u4EFB\u52A1\u5931\u8D25\uFF01\u539F\u56E0\u4E3A:" + _0x51a20b);
-    }
-  }
-}
-async function getCookie() {
-  if ($request && $request.method === "OPTIONS") {
-    return;
-  }
-  const _0x5b67b3 = ObjectKeys2LowerCase($request.headers),
-    _0x1c475c = $.toObj($response.body);
-  if (!(_0x1c475c && _0x5b67b3["xx-token"])) {
-    $.msg($.name, "\u274C\u83B7\u53D6token\u5931\u8D25!", "");
-    return;
-  }
-  const {
-      avatar: _0x4ab600,
-      nick: _0x49cd14,
-      mobile: _0x2b4b0a
-    } = _0x1c475c?.["data"],
-    _0x4b0a6f = {
-      userId: _0x2b4b0a,
-      avatar: _0x4ab600,
-      token: _0x5b67b3["xx-token"],
-      userName: _0x49cd14
-    };
-  userCookie = userCookie ? JSON.parse(userCookie) : [];
-  const _0x10b511 = userCookie.findIndex(_0x10639c => _0x10639c.userId == _0x4b0a6f.userId);
-  userCookie[_0x10b511] ? userCookie[_0x10b511] = _0x4b0a6f : userCookie.push(_0x4b0a6f);
-  $.setjson(userCookie, ckName);
-  $.msg($.name, "\uD83C\uDF89" + _0x4b0a6f.userName + "\u66F4\u65B0token\u6210\u529F!", "");
-}
-async function loadModule() {
-  try {
-    $.SakuraUtils = await loadSakuraUtils();
-    return $.SakuraUtils ? true : false;
-  } catch (_0x4d390c) {
-    throw new Error("\u274CloadModule run error => " + _0x4d390c);
-  }
-}
-async function getWxToken(_0x411665) {
-  try {
-    const _0x479aed = {
-      url: "https://ulp.michelin.com.cn/bff/wechat/login/" + _0x411665,
-      dataType: "json",
-      headers: {}
-    };
-    _0x479aed.headers.Host = "ulp.michelin.com.cn";
-    _0x479aed.headers["User-Agent"] = "Mozilla/5.0 (iPhone; CPU iPhone OS 15_4_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 MicroMessenger/8.0.31(0x18001f37) NetType/WIFI Language/zh_CN";
-    _0x479aed.headers.Referer = "https://servicewechat.com/wx14413dafd16b9540/130/page-frame.html";
-    let _0x5e71ff = await Request(_0x479aed),
-      _0x43b567 = "Bearer " + _0x5e71ff?.["data"]?.["token"]?.["access_token"];
-    return _0x43b567;
-  } catch (_0x27cb3a) {
-    $.log("\u274CgetWxToken run error => " + _0x27cb3a);
-  }
-}
-async function checkCodeServer() {
-  try {
-    $.codeFuc = ($.isNode() ? process.env.codeServer_fun : $.getdata("@codeServer.fun")) || "";
-    let _0x23abfc = $.codeFuc ? (eval($.codeFuc), await WxCode($.appid)) : (await Request({
-      url: $.codeServer + "/?wxappid=" + $.appid
-    }))?.["split"]("|") || [];
-    _0x23abfc = _0x23abfc.filter(_0x1cb843 => _0x1cb843.toString().length === 32);
-    debug(_0x23abfc);
-    !_0x23abfc.length ? $.log("\u274C\u83B7\u53D6code\u6388\u6743\u5931\u8D25\uFF01\u8BF7\u68C0\u67E5\u670D\u52A1\u5668\u8FD0\u884C\u662F\u5426\u6B63\u5E38 => \u5C1D\u8BD5\u8BFB\u53D6\u6570\u636E\u6301\u4E45\u5316 ") : $.log("\u2705\u83B7\u53D6code\u6388\u6743\u6210\u529F\uFF01\u5F53\u524Dcode\u6570\u91CF\u4E3A" + _0x23abfc.length);
-    let _0x56a112 = await Promise.all(_0x23abfc.map(async _0x30c29c => {
-      const _0x18dbf4 = await getWxToken(_0x30c29c),
-        _0x555604 = {
-          token: _0x18dbf4
-        };
-      return _0x555604;
-    }));
-    _0x56a112 = _0x56a112.filter(_0x22693b => Object.keys(_0x22693b).length !== 0);
-    return _0x56a112;
-  } catch (_0x2b3eb0) {
-    $.log("\u274CcheckCodeServer run error => " + _0x2b3eb0);
-  }
-}
-async function checkEnv() {
-  try {
-    let _0x554a64 = [];
-    if ($.wxCode) {
-      _0x554a64 = (await checkCodeServer()) || [];
-    } else {
-      if (!userCookie || !userCookie.length) {
-        console.log("\u672A\u627E\u5230CK");
-        return;
-      }
-    }
-    if (!_0x554a64.length) {
-      const _0x4a6818 = envSplitor.find(_0x4965cc => userCookie.includes(_0x4965cc)) || envSplitor[0];
-      userCookie = $.toObj(userCookie) || userCookie.split(_0x4a6818);
-      _0x554a64 = userCookie;
-    }
-    userList.push(..._0x554a64.map(_0x34ed4a => new UserInfo(_0x34ed4a)).filter(Boolean));
-    userCount = userList.length;
-    console.log("\u5171\u627E\u5230" + userCount + "\u4E2A\u8D26\u53F7");
-    return true;
-  } catch (_0x5b0d10) {
-    throw new Error("\u274CcheckEnv run error => " + _0x5b0d10);
-  }
-}
-async function Request(_0x2880b1) {
-  if (typeof _0x2880b1 === "string") {
-    _0x2880b1 = {
-      url: _0x2880b1
-    };
-  }
-  try {
-    if (!_0x2880b1?.["url"]) {
-      throw new Error("[\u53D1\u9001\u8BF7\u6C42] \u7F3A\u5C11 url \u53C2\u6570");
-    }
-    let {
-      url: _0x237507,
-      type: _0x8108ca,
-      headers = {},
-      body: _0x21041c,
-      params: _0x50c5e8,
-      dataType = "form",
-      deviceType = "mobile",
-      responseType = "data"
-    } = _0x2880b1;
-    const _0x21b121 = _0x8108ca ? _0x8108ca?.["toLowerCase"]() : "body" in _0x2880b1 ? "post" : "get",
-      _0x5925b3 = _0x237507.concat(_0x21b121 === "post" ? "?" + $.SakuraUtils.JsonToUrl(_0x50c5e8) : ""),
-      _0x98c3b = _0x2880b1.timeout ? $.isSurge() ? _0x2880b1.timeout / 1000 : _0x2880b1.timeout : 10000;
-    headers["User-Agent"] ||= headers["User-Agent"] = deviceType === "pc" ? "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36 Edge/16.16299" : "Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Mobile/15E148 Safari/604.1";
-    if (dataType === "json") {
-      headers["Content-Type"] = "application/json;charset=UTF-8";
-    }
-    const _0xc76f78 = _0x21b121 === "post" && _0x21041c ? _0x2880b1.dataType === "form" && typeof _0x21041c === "object" ? $.SakuraUtils.JsonToUrl(_0x21041c) : _0x21041c : "",
-      _0x189fa9 = {
-        body: _0xc76f78
-      };
-    const _0x586edb = {
-        url: _0x5925b3,
-        headers: headers,
-        ...(_0x21b121 === "post" && _0x189fa9),
-        ...(_0x21b121 === "get" && _0x50c5e8 && {
-          params: _0x50c5e8
-        })
-      },
-      _0x27a0d4 = $.http[_0x21b121.toLowerCase()](_0x586edb).then(_0x2a3e1c => responseType == "data" ? $.toObj(_0x2a3e1c.body) || _0x2a3e1c.body : $.toObj(_0x2a3e1c) || _0x2a3e1c).catch(_0x44392d => $.log("\u274C\u8BF7\u6C42\u53D1\u8D77\u5931\u8D25\uFF01\u539F\u56E0\u4E3A\uFF1A" + _0x44392d));
-    return Promise.race([new Promise((_0x170069, _0x43b96c) => setTimeout(() => _0x43b96c("\u5F53\u524D\u8BF7\u6C42\u5DF2\u8D85\u65F6"), _0x98c3b)), _0x27a0d4]);
-  } catch (_0x156381) {
-    console.log("\u274C\u8BF7\u6C42\u53D1\u8D77\u5931\u8D25\uFF01\u539F\u56E0\u4E3A\uFF1A" + _0x156381);
-  }
-}
-function randomInt(_0x4dcd69, _0x163edf) {
-  return Math.round(Math.random() * (_0x163edf - _0x4dcd69) + _0x4dcd69);
-}
-function DoubleLog(_0xb69351) {
-  if (_0xb69351 && $.isNode()) {
-    console.log("" + _0xb69351);
-    $.notifyMsg.push("" + _0xb69351);
-  } else {
-    _0xb69351 && (console.log("" + _0xb69351), $.notifyMsg.push("" + _0xb69351));
-  }
-}
-function debug(_0x104fda, _0x44284c = "debug") {
-  $.is_debug === "true" && ($.log("\n-----------" + _0x44284c + "------------\n"), $.log(typeof _0x104fda == "string" ? _0x104fda : $.toStr(_0x104fda) || "debug error => t=" + _0x104fda), $.log("\n-----------" + _0x44284c + "------------\n"));
-}
-function getQueries(_0xbe7974) {
-  const [, _0x53e657] = _0xbe7974.split("?");
-  return _0x53e657 ? _0x53e657.split("&").reduce((_0x3ef4c8, _0x51b591) => {
-    var [_0x33468f, _0x51b591] = _0x51b591.split("=");
-    _0x3ef4c8[_0x33468f] = _0x51b591;
-    return _0x3ef4c8;
-  }, {}) : {};
-}
-async function getNotice() {
-  const _0x513c13 = ["https://raw.githubusercontent.com/Sliverkiss/GoodNight/main/notice.json", "https://raw.githubusercontent.com/Sliverkiss/GoodNight/main/tip.json"];
-  try {
-    const _0x4d2c38 = await Promise.all(_0x513c13.map(_0x4e76eb => Request(_0x4e76eb)));
-    _0x4d2c38.map(_0x51aab7 => console.log(_0x51aab7?.["notice"] || "\u83B7\u53D6\u901A\u77E5\u5931\u8D25"));
-  } catch (_0x202dbb) {
-    console.log("\u274C\u83B7\u53D6\u901A\u77E5\u65F6\u53D1\u751F\u9519\u8BEF\uFF1A" + _0x202dbb);
-  }
-}
-async function SendMsgList(_0x423525) {
-  await Promise.allSettled(_0x423525?.["map"](_0x2fd74c => SendMsg(_0x2fd74c.message.join("\n"), _0x2fd74c.avatar)));
-}
-async function SendMsg(_0x37ebab, _0x2866c7) {
-  const _0x1e6a2f = {
-    "media-url": _0x2866c7
-  };
-  _0x37ebab && (0 < Notify ? $.isNode() ? await notify.sendNotify($.name, _0x37ebab) : $.msg($.name, $.title || "", _0x37ebab, _0x1e6a2f) : console.log(_0x37ebab));
-}
-function ObjectKeys2LowerCase(_0x4fbf9e) {
-  _0x4fbf9e = Object.fromEntries(Object.entries(_0x4fbf9e).map(([_0x2c57ed, _0x19f062]) => [_0x2c57ed.toLowerCase(), _0x19f062]));
-  return new Proxy(_0x4fbf9e, {
-    get: function (_0x4685dc, _0x2dff8b, _0x7d4971) {
-      return Reflect.get(_0x4685dc, _0x2dff8b.toLowerCase(), _0x7d4971);
-    },
-    set: function (_0x3cdaf3, _0x5d8de2, _0x1380cf, _0x562eba) {
-      return Reflect.set(_0x3cdaf3, _0x5d8de2.toLowerCase(), _0x1380cf, _0x562eba);
-    }
+/**
+*@file       腾讯视频
+*@desp       本脚本仅适用于腾讯视频及体育会员每日签到，仅测试Quantumult X、青龙（只支持单账号）
+*@env        txspCookie、txspRefreshCookie、txspRefreshBody、dayOfGetMonthTicket、isSkipTxspCheckIn、isLottery
+*@author     WowYiJiu
+*@updated    2024-6-14
+*@version    v1.0.3
+*@link       https://raw.githubusercontent.com/WowYiJiu/Personal/main/Script/tenvideo.js
+
+🌟 环境变量说明
+txspCookie：腾讯视频app的Cookie
+txspRefreshCookie、txspRefreshBody：腾讯视频网页NewRefresh接口中的数据，用来刷新Cookie中的vqq_vusession
+dayOfGetMonthTicket：每月几号领取每月球票，默认为每月1号
+isSkipTxspCheckIn：值域[true, false] 默认为false表示正常进行腾讯视频会员签到，用于特殊情况下（账号需要获取短信验证码或者需要过滑块验证码）时开启
+isLottery: 值域[true, false] 默认为false表示不抽奖，抽抽乐于2024年2月29日10点下线，建议不开启，反正也抽不到
+❗ 本脚本只能给腾讯视频正常账号签到，如有验证请设置isSkipTxspCheckIn为true，直到手动签到无验证为止
+❖❖❖❖❖❖❖❖❖❖❖❖❖❖❖❖❖❖❖❖❖❖❖❖❖❖❖❖
+
+详细功能：
+🔵 腾讯视频会员签到领V力值
+🔵 腾讯体育会员签到领热爱值
+🔵 腾讯体育领取每日球票
+🔵 腾讯体育领取每月球票
+
+📌 获取Cookie：（重写需要获取3个值：txspCookie、txspRefreshCookie、txspRefreshBody)
+- 进入腾讯视频app，点击右下角我的，点击头像下的视频VIP进入会员中心看到系统消息提示获取txspCookie成功即可
+- 浏览器进入腾讯视频网页版，登录后切换成桌面版，刷新网页看到系统消息提示获取txspRefreshCookie、txspRefreshBody成功即可
+- 获取Cookie后, 请将Cookie脚本禁用并移除主机名，以免产生不必要的MITM
+
+💬 BoxJs订阅：https://raw.githubusercontent.com/WowYiJiu/Personal/main/WowYiJiu.box.json
+
+⚙ 配置 (Quantumult X)
+[MITM]
+hostname = vip.video.qq.com, pbaccess.video.qq.com
+
+[rewrite_local]
+https://vip.video.qq.com/rpc/trpc.new_task_system.task_system.TaskSystem/ReadTaskList? url script-request-header https://raw.githubusercontent.com/WowYiJiu/Personal/main/Script/tenvideo.js
+https://pbaccess.video.qq.com/trpc.videosearch.hot_rank.HotRankServantHttp/HotRankHttp url script-request-header https://raw.githubusercontent.com/WowYiJiu/Personal/main/Script/tenvideo.js
+https://pbaccess.video.qq.com/trpc.video_account_login.web_login_trpc.WebLoginTrpc/NewRefresh url script-request-body https://raw.githubusercontent.com/WowYiJiu/Personal/main/Script/tenvideo.js
+
+[rewrite_remote]
+https://raw.githubusercontent.com/WowYiJiu/Personal/main/rewrite/get_tenvideo_cookie.conf, tag=腾讯视频, update-interval=172800, opt-parser=false, enabled=false
+
+[task_local]
+5 7 * * * https://raw.githubusercontent.com/WowYiJiu/Personal/main/Script/tenvideo.js, tag=腾讯视频, img-url=https://github.com/WowYiJiu/Personal/blob/main/icon/Color/tenvideo.png?raw=true, enabled=true
+*/
+const $ = new Env("\u817E\u8BAF\u89C6\u9891");
+let txspCookie = ($.isNode() ? process.env.txspCookie : $.getdata("txspCookie")) || "";
+let txspRefreshCookie = ($.isNode() ? process.env.txspRefreshCookie : $.getdata("txspRefreshCookie")) || "";
+let txspRefreshBody = ($.isNode() ? process.env.txspRefreshBody : $.getdata("txspRefreshBody")) || "";
+let dayOfGetMonthTicket = ($.isNode() ? process.env.dayOfGetMonthTicket : $.getdata("dayOfGetMonthTicket")) || 1;
+let isSkipTxspCheckIn = $.isNode() ? process.env.isSkipTxspCheckIn : $.getdata("isSkipTxspCheckIn") !== undefined && $.getdata("isSkipTxspCheckIn") !== "" ? JSON.parse($.getdata("isSkipTxspCheckIn")) : false;
+let isLottery = $.isNode() ? process.env.isLottery : $.getdata("isLottery") !== undefined && $.getdata("isLottery") !== "" ? JSON.parse($.getdata("isLottery")) : false;
+const Notify = 1; //0为关闭通知,1为打开通知,默认为1
+const notify = $.isNode() ? require("./sendNotify") : "";
+let currentVersion = "v1.0.3",
+  latestVersion = "";
+let nickname = "";
+let isTxspVip = false,
+  isTxspSvip = false,
+  isTxSportsVip = false,
+  isTxSportsSvip = false;
+let endTime = "",
+  svipEndTime = "",
+  txSportsEndTime = "",
+  txSportsSvipEndTime = "";
+let level = "",
+  txSportsLevel = "";
+let score = "",
+  txSportsScore = "";
+let month_received_score = "",
+  month_limit = "";
+let isTxspCheckIn = "",
+  isTxSportsCheckIn = "";
+let originalInfo = $.info;
+let originalWarn = $.warn;
+let originalError = $.error;
+let message = "";
+$.desc = "", $.taskInfo = "";
+$.info = function (message) {
+  originalInfo.call($, message);
+  $.desc += message + "\n";
+};
+$.warn = function (message) {
+  originalWarn.call($, message);
+  $.desc += message + "\n";
+};
+$.error = function (message) {
+  originalError.call($, message);
+  $.desc += message + "\n";
+};
+if (isGetCookie = typeof $request !== `undefined`) {
+  getCookie();
+  $.done();
+} else if (!$.isNode() && !txspCookie) {
+  $.msg($.name, "\u60A8\u672A\u83B7\u53D6\u817E\u8BAF\u89C6\u9891Cookie", "\u70B9\u51FB\u6B64\u6761\u8DF3\u8F6C\u5230\u817E\u8BAF\u89C6\u9891\u83B7\u53D6Cookie", {
+    "open-url": "tenvideo://",
+    "media-url": "https://raw.githubusercontent.com/WowYiJiu/Personal/main/icon/videoqq.png"
   });
+  $.done();
+} else {
+  !(async () => {
+    $.log(`                               _  _ _         `);
+    $.log(`  __      _______      ___   _(_)(_|_)_   _   `);
+    $.log(`  \\ \\ /\\ / / _ \\ \\ /\\ / / | | | || | | | | |  `);
+    $.log(`   \\ \V  \V / (_) \\ \V  \V /| |_| | || | | |_| |  `);
+    $.log(`    \\_/\\_/ \\___/ \\_/\\_/  \\__, |_|/ |_|\\__,_|  `);
+    $.log(`                         |___/ |__/           `);
+    await getNotice();
+    await getVersion();
+    $.log(`\n当前版本：${currentVersion}  最新版本：${latestVersion}\n`);
+    $.version = `\n当前版本：${currentVersion}  最新版本：${latestVersion}\n`;
+    if (!txspCookie) {
+      $.warn(`未填写txspCookie环境变量`);
+      return;
+    }
+    $.info("---- \u5F00\u59CB \u5237\u65B0vusession ----");
+    await refresh_vusession();
+    $.info(`--------- 结束 ---------\n`);
+    $.info(`用户昵称：${nickname}`);
+    await getVipInfo();
+    if (isTxspVip) {
+      $.info(`---- 腾讯视频VIP信息 ----`);
+      if (isTxspSvip) {
+        $.info(`当前是腾讯视频SVIP`);
+      } else {
+        $.info(`当前是腾讯视频VIP`);
+      }
+      $.info(`当前等级：${level}`);
+      $.info(`当前成长：${score}`);
+      if (isTxspSvip) {
+        $.info(`SVIP到期时间：${svipEndTime}`);
+      }
+      $.info(`VIP到期时间：${endTime}`);
+      $.info(`--------- 结束 ---------\n`);
+    }
+    if (isTxSportsVip) {
+      $.info(`--- 腾讯体育VIP信息 ---`);
+      if (isTxSportsSvip) {
+        $.info(`当前是腾讯体育超级VIP`);
+      } else {
+        $.info(`当前是腾讯体育VIP`);
+      }
+      $.info(`当前等级：${txSportsLevel}`);
+      $.info(`当前成长：${txSportsScore}`);
+      if (isTxSportsSvip) {
+        $.info(`SVIP到期时间：${txSportsSvipEndTime}`);
+      }
+      $.info(`VIP到期时间：${txSportsEndTime}`);
+      $.info(`--------- 结束 ---------\n`);
+    }
+    if (isTxspVip) {
+      $.info(`---- 开始 腾讯视频签到 ----`);
+      if (isSkipTxspCheckIn) {
+        $.info(`当前设置为不进行腾讯视频签到，跳过`);
+      } else {
+        await readTxspTaskList();
+        await waitRandom(1000, 2000);
+        if (month_received_score === month_limit) {
+          $.info(`本月活跃任务已满${month_limit}V力值，下个月再来哦`);
+        } else if (isTxspCheckIn) {
+          $.info(`今天已签到, 明日再来吧`);
+        } else {
+          await txspCheckIn();
+          await waitRandom(1000, 2000);
+        }
+      }
+      $.info(`--------- 结束 ---------\n`);
+    }
+    if (isTxSportsVip) {
+      $.info(`---- 开始 腾讯体育签到 ----`);
+      await readTxSportsTaskList();
+      await waitRandom(1000, 2000);
+      if (isTxSportsCheckIn) {
+        $.info(`今天已签到, 明日再来吧`);
+      } else {
+        await txSportsCheckIn();
+        await waitRandom(1000, 2000);
+      }
+      $.info(`--------- 结束 ---------\n`);
+      $.info(`---- 开始 领取每日球票 ----`);
+      await getDayTicket();
+      await waitRandom(1000, 2000);
+      $.info(`--------- 结束 ---------\n`);
+      $.info(`---- 开始 领取每月球票 ----`);
+      var today = new Date();
+      var date = today.getDate();
+      if (date !== dayOfGetMonthTicket) {
+        $.info(`目标日期：${dayOfGetMonthTicket}号`);
+        $.info(`今天是${date}号`);
+        $.info(`跳过`);
+      } else {
+        $.info(`目标日期：${dayOfGetMonthTicket}号`);
+        $.info(`今天是${date}号`);
+        await getMonthTicket();
+      }
+      $.info(`--------- 结束 ---------\n`);
+      if (isLottery) {
+        $.info(`---- 开始 抽抽乐 ----`);
+        await lottery();
+        await waitRandom(1000, 2000);
+        $.info(`--------- 结束 ---------`);
+      }
+    }
+    await SendMsg();
+  })().catch(e => $.error(e)).finally(() => $.done());
 }
-async function loadSakuraUtils() {
-  let _0x5970f4 = ($.isNode() ? process.env.SakuraUtil_code : $.getdata("SakuraUtil_code")) || "";
-  if (_0x5970f4 && Object.keys(_0x5970f4).length) {
-    console.log("\u2705" + $.name + ":\u7F13\u5B58\u4E2D\u5B58\u5728SakuraUtil\u4EE3\u7801,\u8DF3\u8FC7\u4E0B\u8F7D");
-    eval(_0x5970f4);
-    return creatUtils();
-  }
-  console.log("\uD83D\uDE80" + $.name + ":\u5F00\u59CB\u4E0B\u8F7DSakuraUtil\u4EE3\u7801");
-  return new Promise(async _0x52bc58 => {
-    $.getScript("https://cdn.jsdelivr.net/gh/Sliverkiss/QuantumultX@main/Utils/SakuraUtil.js").then(_0x31adee => {
-      $.setdata(_0x31adee, "SakuraUtil_code");
-      eval(_0x31adee);
-      const _0x4ade8f = creatUtils();
-      console.log("\u2705SakuraUtil\u52A0\u8F7D\u6210\u529F,\u8BF7\u7EE7\u7EED");
-      _0x52bc58(_0x4ade8f);
+async function refresh_vusession() {
+  return new Promise(resolve => {
+    let opt = {
+      url: `https://pbaccess.video.qq.com/trpc.video_account_login.web_login_trpc.WebLoginTrpc/NewRefresh`,
+      headers: {
+        cookie: txspRefreshCookie,
+        origin: "https://v.qq.com",
+        referer: "https://v.qq.com/",
+        "Content-Type": "application/json"
+      },
+      body: txspRefreshBody
+    };
+    $.post(opt, async (error, resp, data) => {
+      if (safeGet(data)) {
+        var obj = JSON.parse(data);
+        if (obj.data.errcode === 0) {
+          let vqq_vusession = obj.data.vusession;
+          nickname = decodeURIComponent(obj.data.nick);
+          if (txspCookie.match(/main_login=([^;]*)/)[1] === "qq") {
+            txspCookie = txspCookie.replace(/(vqq_vusession=)[^;]*/, `$1${vqq_vusession}`);
+          } else if (txspCookie.match(/main_login=([^;]*)/)[1] === "wx") {
+            txspCookie = txspCookie.replace(/(vusession=)[^;]*/, `$1${vusession}`);
+          }
+          $.info("\u5237\u65B0vusession\u6210\u529F");
+        } else {
+          $.warn("\u5237\u65B0vusession\u5931\u8D25");
+        }
+        resolve();
+      }
     });
   });
 }
-!(async () => {
-  if (typeof $request != "undefined") {
-    await getCookie();
-  } else {
-    if (!(await loadModule())) {
-      throw new Error("\u274C\u52A0\u8F7D\u6A21\u5757\u5931\u8D25\uFF0C\u8BF7\u68C0\u67E5\u6A21\u5757\u8DEF\u5F84\u662F\u5426\u6B63\u5E38");
-    }
-    if (!(await checkEnv())) {
-      throw new Error("\u274C\u672A\u68C0\u6D4B\u5230ck\uFF0C\u8BF7\u6DFB\u52A0\u73AF\u5883\u53D8\u91CF");
-    }
-    if (userList.length > 0) {
-      await main();
+async function getVipInfo() {
+  return new Promise((resolve, reject) => {
+    let opt = {
+      url: `https://vip.video.qq.com/rpc/trpc.query_vipinfo.vipinfo.QueryVipInfo/GetVipUserInfoH5`,
+      headers: {
+        cookie: txspCookie,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        "geticon": 1,
+        "viptype": "svip|sports|nfl",
+        "platform": 5
+      })
+    };
+    $.post(opt, async (error, resp, data) => {
+      try {
+        if (safeGet(data)) {
+          var obj = JSON.parse(data);
+          if (!obj.servicetype) {
+            throw new Error(`Cookie已失效`);
+          } else {
+            if (obj.vip === 1) {
+              isTxspVip = true;
+              endTime = obj.endTime;
+              level = obj.level;
+              score = obj.score;
+            }
+            if (obj.svip_info.vip === 1) {
+              isTxspSvip = true;
+              svipEndTime = obj.svip_info.endTime;
+            }
+            if (obj.sports.vip.vip === 1) {
+              isTxSportsVip = true;
+              txSportsEndTime = obj.sports.vip.endTime;
+              txSportsLevel = obj.sports.vip.level;
+              txSportsScore = obj.sports.vip.score;
+            }
+            if (obj.sports.svip.vip === 1) {
+              isTxSportsSvip = true;
+              txSportsSvipEndTime = obj.sports.svip.endTime;
+            }
+          }
+          resolve();
+        }
+      } catch (e) {
+        $.error(e);
+        reject(`该账号本次跳过执行\n`);
+      }
+    });
+  });
+}
+
+/**
+ * 获取腾讯视频任务列表
+ * @async
+ * @function readTxspTaskList
+ * @returns
+ */
+async function readTxspTaskList() {
+  return new Promise(resolve => {
+    let opt = {
+      url: `https://vip.video.qq.com/rpc/trpc.new_task_system.task_system.TaskSystem/ReadTaskList?rpc_data={"business_id":"1","platform":5}`,
+      headers: {
+        Referer: "https://film.video.qq.com/x/grade/?ptag=user.apho&ovscroll=0&hidetitlebar=1&aid=V0$$1:0$2:7$3:8.11.01.25068$4:0$8:4&isDarkMode=1&uiType=REGULAR",
+        Cookie: txspCookie
+      }
+    };
+    $.get(opt, async (error, resp, data) => {
+      try {
+        if (safeGet(data)) {
+          var obj = JSON.parse(data);
+          var code = obj.ret;
+          let task_maintitle = "";
+          if (code === 0) {
+            month_received_score = obj.limit_info.month_received_score;
+            month_limit = obj.limit_info.month_limit;
+            let taskList = obj.task_list;
+            let txspCheckInTask = taskList && taskList.find(task => task.task_maintitle === "VIP\u4F1A\u5458\u6BCF\u65E5\u7B7E\u5230");
+            isTxspCheckIn = txspCheckInTask.task_status;
+          } else {
+            $.warn(`获取腾讯视频任务列表失败，异常详细信息如下\n${data}`);
+          }
+          resolve();
+        }
+      } catch (e) {
+        $.error(e);
+      }
+    });
+  });
+}
+
+/**
+ * 腾讯视频签到领取V力值
+ * @async
+ * @function txspCheckIn
+ * @returns
+ */
+async function txspCheckIn() {
+  return new Promise((resolve, reject) => {
+    let opt = {
+      url: `https://vip.video.qq.com/rpc/trpc.new_task_system.task_system.TaskSystem/CheckIn?rpc_data={}`,
+      headers: {
+        Referer: "https://film.video.qq.com/x/grade/?ptag=user.apho&ovscroll=0&hidetitlebar=1&aid=V0$$1:0$2:7$3:8.11.01.25068$4:0$8:4&isDarkMode=1&uiType=REGULAR",
+        Cookie: txspCookie
+      }
+    };
+    $.get(opt, async (error, resp, data) => {
+      var obj = JSON.parse(data);
+      var code = obj.ret;
+      if (code === 0 && obj.check_in_score != undefined) {
+        $.info(`签到成功：获得${obj.check_in_score}V力值`);
+        $.taskInfo = `签到成功：获得${obj.check_in_score}V力值\n`;
+      } else if (code === -2002) {
+        $.info(`今天已签到, 明日再来吧`);
+        $.taskInfo = `今天已签到, 明日再来吧\n`;
+      } else {
+        $.warn(`签到失败，异常详细信息如下\n${data}`);
+        $.taskInfo = `签到失败, 异常详细信息请查看日志\n`;
+      }
+      resolve();
+    });
+  });
+}
+
+/**
+ * 获取腾讯体育任务列表
+ * @async
+ * @function readTxSportsTaskList
+ * @returns
+ */
+async function readTxSportsTaskList() {
+  return new Promise(resolve => {
+    let opt = {
+      url: `https://vip.video.qq.com/rpc/trpc.new_task_system.task_system.TaskSystem/ReadTaskList?rpc_data={"business_id":3,"channel_id":4,"platform":5}`,
+      headers: {
+        Referer: "https://film.video.qq.com/x/sports-grade/?ovscroll=0&hidetitlebar=1&immersive=1",
+        Cookie: txspCookie
+      }
+    };
+    $.get(opt, async (error, resp, data) => {
+      try {
+        if (safeGet(data)) {
+          var obj = JSON.parse(data);
+          var code = obj.ret;
+          let task_maintitle = "";
+          if (code === 0) {
+            let taskList = obj.task_list;
+            let txSportsCheckInTasks = taskList && taskList.find(task => task.task_maintitle === "\u6BCF\u65E5\u7B7E\u5230");
+            isTxSportsCheckIn = txSportsCheckInTasks.task_status;
+          } else {
+            $.warn(`获取腾讯视频任务列表失败，异常详细信息如下\n${data}`);
+          }
+          resolve();
+        }
+      } catch (e) {
+        $.error(e);
+      }
+    });
+  });
+}
+
+/**
+ * 腾讯体育签到领取热爱值
+ * @async
+ * @function txSportsCheckIn
+ * @returns
+ */
+async function txSportsCheckIn() {
+  return new Promise((resolve, reject) => {
+    let opt = {
+      url: `https://vip.video.qq.com/rpc/trpc.new_task_system.task_system.TaskSystem/CheckIn?rpc_data={"task_id":8006}`,
+      headers: {
+        Referer: "https://film.video.qq.com/x/sports-grade/?ovscroll=0&hidetitlebar=1&immersive=1",
+        Cookie: txspCookie
+      }
+    };
+    $.get(opt, async (error, resp, data) => {
+      var obj = JSON.parse(data);
+      var code = obj.ret;
+      if (code === 0 && obj.check_in_score != undefined) {
+        $.info(`签到成功：获得${obj.check_in_score}热爱值`);
+        $.taskInfo += `签到成功：获得${obj.check_in_score}热爱值\n`;
+      } else if (code === -2002) {
+        $.info(`今天已签到, 明日再来吧`);
+        $.taskInfo += `今天已签到, 明日再来吧\n`;
+      } else {
+        $.warn(`签到失败，异常详细信息如下\n${data}`);
+        $.taskInfo += `签到失败, 异常详细信息请查看日志\n`;
+      }
+      resolve();
+    });
+  });
+}
+
+/**
+ * 领取每日球票
+ * @async
+ * @function getDayTicket
+ * @returns
+ */
+async function getDayTicket() {
+  return new Promise((resolve, reject) => {
+    let opt = {
+      url: "https://activity.video.qq.com/fcgi-bin/asyn_activity?otype=xjson&act_id=118561&module_id=158089&type=90&option=5",
+      headers: {
+        Origin: "https://film.video.qq.com",
+        Referer: "https://film.video.qq.com/x/sports-vip-channel/?from=tab",
+        Cookie: txspCookie
+      }
+    };
+    $.get(opt, async (error, resp, data) => {
+      try {
+        var obj = JSON.parse(data);
+        var code = obj.ret;
+        if (code === 0) {
+          $.info(`领取每日球票成功`);
+          $.taskInfo += `领取每日球票成功\n`;
+        } else if (code === -2021) {
+          $.info(`每日球票已领取, 明日再来吧`);
+          $.taskInfo += `每日球票已领取, 明日再来吧\n`;
+        } else {
+          $.warn(`领取每日球票失败，异常详细信息如下\n${data}`);
+          $.taskInfo += `领取每日球票失败，异常详细信息请查看日志\n`;
+        }
+      } catch (e) {
+        $.error(e);
+      } finally {
+        resolve();
+      }
+    });
+  });
+}
+
+/**
+ * 领取每月球票
+ * @async
+ * @function getMonthTicket
+ * @returns
+ */
+async function getMonthTicket() {
+  return new Promise((resolve, reject) => {
+    let opt = {
+      url: "https://activity.video.qq.com/fcgi-bin/asyn_activity?otype=xjson&act_id=118561&module_id=165163&type=100160&option=100",
+      headers: {
+        Origin: "https://film.video.qq.com",
+        Referer: "https://film.video.qq.com/x/sports-vip-channel/?from=tab",
+        Cookie: txspCookie
+      }
+    };
+    $.get(opt, async (error, resp, data) => {
+      try {
+        var obj = JSON.parse(data);
+        var code = obj.ret;
+        if (code === 0) {
+          $.info(`领取每月球票成功`);
+          $.taskInfo += `领取每月球票成功\n`;
+        } else if (code === -903) {
+          $.info(`每月球票已领取，下个月再来哦`);
+          $.taskInfo += `每月球票已领取，下个月再来哦\n`;
+        } else {
+          $.warn(`领取每月球票失败，异常详细信息如下\n${data}`);
+          $.taskInfo += `领取每月球票失败，异常详细信息请查看日志\n`;
+        }
+      } catch (e) {
+        $.error(e);
+      } finally {
+        resolve();
+      }
+    });
+  });
+}
+
+/**
+ * 抽抽乐 2024年2月29日10点下线
+ * @async
+ * @function lottery()
+ * @returns
+ */
+async function lottery() {
+  return new Promise((resolve, reject) => {
+    let opt = {
+      url: "https://activity.video.qq.com/fcgi-bin/asyn_activity?otype=xjson&act_id=118561&module_id=158090&type=100143&option=100",
+      headers: {
+        Origin: "https://film.video.qq.com",
+        Referer: "https://film.video.qq.com/x/sports-vip-channel/?from=tab",
+        Cookie: txspCookie
+      }
+    };
+    $.get(opt, async (error, resp, data) => {
+      try {
+        var obj = JSON.parse(data);
+        var code = obj.ret;
+        if (code === 0) {
+          $.info(`抽奖成功: ${obj.lotter_ext}`);
+        } else if (code === -904) {
+          $.info(`今天已抽奖, 明日再来吧`);
+        } else {
+          $.warn(`抽奖失败，异常详细信息如下\n${data}`);
+        }
+      } catch (e) {
+        $.error(e);
+      } finally {
+        resolve();
+      }
+    });
+  });
+}
+function getCookie() {
+  if ($request && $request.method != `OPTIONS` && $request.url.match(/\/rpc\/trpc\.new_task_system\.task_system\.TaskSystem\/ReadTaskList/)) {
+    let txsp = $request.headers["Cookie"] || $request.headers["cookie"];
+    if (txsp) {
+      if (typeof txspCookie === "undefined" || txspCookie && txspCookie.length === 0) {
+        $.setdata(txsp, "txspCookie");
+        $.log(`Cookie: ${txsp}`);
+        $.msg($.name, "\uD83C\uDF89 Cookie\u5199\u5165\u6210\u529F", "\u4E0D\u7528\u8BF7\u81EA\u884C\u5173\u95ED\u91CD\u5199!");
+      } else if (txsp !== txspCookie) {
+        $.setdata(txsp, "txspCookie");
+        $.log(`Cookie: ${txsp}`);
+        $.msg($.name, "\uD83C\uDF89 Cookie\u66F4\u65B0\u6210\u529F", "\u4E0D\u7528\u8BF7\u81EA\u884C\u5173\u95ED\u91CD\u5199!");
+      } else {
+        $.msg($.name, "\u26A0\uFE0F Cookie\u672A\u53D8\u52A8 \u8DF3\u8FC7\u66F4\u65B0", "\u4E0D\u7528\u8BF7\u81EA\u884C\u5173\u95ED\u91CD\u5199!");
+      }
+    } else {
+      $.msg($.name, "\u26A0\uFE0F Cookie\u672A\u627E\u5230", "\u4E0D\u7528\u8BF7\u81EA\u884C\u5173\u95ED\u91CD\u5199!");
     }
   }
-})().catch(_0x2cf5aa => $.notifyMsg.push(_0x2cf5aa.message || _0x2cf5aa)).finally(async () => {
-  await SendMsgList($.notifyList);
-  const _0x24ee5a = {
-    ok: 1
+  if ($request && $request.method != `OPTIONS` && $request.url.match(/\/trpc\.videosearch\.hot_rank\.HotRankServantHttp\/HotRankHttp/)) {
+    let refreshCookie = $request.headers["Cookie"] || $request.headers["cookie"];
+    if (refreshCookie) {
+      if (typeof txspRefreshCookie === "undefined" || txspRefreshCookie && txspRefreshCookie.length === 0) {
+        $.setdata(refreshCookie, "txspRefreshCookie");
+        $.log(`Cookie: ${refreshCookie}`);
+        $.msg($.name, "\uD83C\uDF89 refreshCookie\u5199\u5165\u6210\u529F", "\u4E0D\u7528\u8BF7\u81EA\u884C\u5173\u95ED\u91CD\u5199!");
+      } else if (refreshCookie !== txspRefreshCookie) {
+        $.setdata(refreshCookie, "txspRefreshCookie");
+        $.log(`Cookie: ${refreshCookie}`);
+        $.msg($.name, "\uD83C\uDF89 refreshCookie\u66F4\u65B0\u6210\u529F", "\u4E0D\u7528\u8BF7\u81EA\u884C\u5173\u95ED\u91CD\u5199!");
+      } else {
+        $.msg($.name, "\u26A0\uFE0F refreshCookie\u672A\u53D8\u52A8 \u8DF3\u8FC7\u66F4\u65B0", "\u4E0D\u7528\u8BF7\u81EA\u884C\u5173\u95ED\u91CD\u5199!");
+      }
+    } else {
+      $.msg($.name, "\u26A0\uFE0F refreshCookie\u672A\u627E\u5230", "\u4E0D\u7528\u8BF7\u81EA\u884C\u5173\u95ED\u91CD\u5199!");
+    }
+  }
+  if ($request && $request.method != `OPTIONS` && $request.url.match(/\/trpc\.video_account_login\.web_login_trpc\.WebLoginTrpc\/NewRefresh/)) {
+    let refreshBody = $request.body;
+    if (refreshBody) {
+      if (typeof txspRefreshBody === "undefined" || txspRefreshBody && txspRefreshBody.length === 0) {
+        $.setdata(refreshBody, "txspRefreshBody");
+        $.log(`refreshBody: ${refreshBody}`);
+        $.msg($.name, "\uD83C\uDF89 refreshBody\u5199\u5165\u6210\u529F", "\u4E0D\u7528\u8BF7\u81EA\u884C\u5173\u95ED\u91CD\u5199!");
+      } else if (refreshBody !== txspRefreshBody) {
+        $.setdata(refreshBody, "txspRefreshBody");
+        $.log(`refreshBody: ${refreshBody}`);
+        $.msg($.name, "\uD83C\uDF89 refreshBody\u66F4\u65B0\u6210\u529F", "\u4E0D\u7528\u8BF7\u81EA\u884C\u5173\u95ED\u91CD\u5199!");
+      } else {
+        $.msg($.name, "\u26A0\uFE0F refreshBody\u672A\u53D8\u52A8 \u8DF3\u8FC7\u66F4\u65B0", "\u4E0D\u7528\u8BF7\u81EA\u884C\u5173\u95ED\u91CD\u5199!");
+      }
+    }
+  }
+}
+async function getNotice() {
+  return new Promise(resolve => {
+    let opt = {
+      url: "https://github.wowyijiu.today/https://raw.githubusercontent.com/WowYiJiu/Personal/main/WowYiJiu.json",
+      timeout: 10000
+    };
+    $.get(opt, async (error, resp, data) => {
+      try {
+        if (error) {
+          $.error("\uD83D\uDC7E \u83B7\u53D6\u514D\u8D23\u58F0\u660E\u5931\u8D25");
+          resolve();
+        } else {
+          if (data) {
+            var obj = JSON.parse(data);
+            $.log(obj.notice);
+            resolve();
+          }
+        }
+      } catch (e) {
+        $.error(e);
+        resolve();
+      }
+    });
+  });
+}
+async function getVersion() {
+  const timeoutMs = 10000;
+  const opt = {
+    url: "https://github.wowyijiu.today/https://raw.githubusercontent.com/WowYiJiu/Personal/main/Script/tenvideo.js",
+    timeout: timeoutMs
   };
-  $.done(_0x24ee5a);
-});
+  const data = await new Promise(resolve => {
+    $.get(opt, (error, resp, data) => {
+      if (error) {
+        resolve("undefined");
+      } else {
+        resolve(data);
+      }
+    });
+  });
+  const versionInfo = data.match(/@version\s+(v\d+\.\d+\.\d+)/);
+  if (versionInfo) {
+    latestVersion = versionInfo[1];
+  } else {
+    latestVersion = "undefined";
+  }
+  return latestVersion;
+}
+async function SendMsg() {
+  if (Notify > 0) {
+    if ($.isNode()) {
+      await notify.sendNotify($.name, `${$.version}\n\n${$.desc}`);
+    } else {
+      $.msg($.name, "", `${$.version}\n${$.taskInfo}`);
+    }
+  } else {
+    $.msg($.name, "", `${$.version}\n${$.taskInfo}`);
+  }
+}
+async function waitRandom(min, max) {
+  var time = getRandomInt(min, max);
+  await $.wait(time);
+}
+
+// 随机生成整数
+function getRandomInt(min, max) {
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+// 提取Cookie的指定字段
+function extractValues(str, keys) {
+  let results = keys.map(key => str.split("; ").find(s => s.startsWith(key + "=")));
+  return results.join(";");
+}
+
+// 判断时间戳是不是今天
+function isToday(timestamp) {
+  let date = new Date(timestamp);
+  let today = new Date();
+  return date.getDate() === today.getDate() && date.getMonth() === today.getMonth() && date.getFullYear() === today.getFullYear();
+}
+function safeGet(data) {
+  try {
+    if (typeof JSON.parse(data) == "object") {
+      return true;
+    }
+  } catch (e) {
+    $.error(e);
+    $.error(`腾讯视频访问数据为空，请检查Cookie是否有效`);
+    return false;
+  }
+}
+
+// prettier-ignore
 function Env(t, e) {
   class s {
     constructor(t) {
@@ -396,10 +707,9 @@ function Env(t, e) {
         url: t
       } : t;
       let s = this.get;
-      "POST" === e && (s = this.post);
-      return new Promise((e, a) => {
-        s.call(this, t, (t, s, r) => {
-          t ? a(t) : e(s);
+      return "POST" === e && (s = this.post), new Promise((e, i) => {
+        s.call(this, t, (t, s, o) => {
+          t ? i(t) : e(s);
         });
       });
     }
@@ -412,18 +722,17 @@ function Env(t, e) {
   }
   return new class {
     constructor(t, e) {
-      this.name = t;
-      this.http = new s(this);
-      this.data = null;
-      this.dataFile = "box.dat";
-      this.logs = [];
-      this.isMute = !1;
-      this.isNeedRewrite = !1;
-      this.logSeparator = "\n";
-      this.encoding = "utf-8";
-      this.startTime = new Date().getTime();
-      Object.assign(this, e);
-      this.log("", `🔔${this.name}, 开始!`);
+      this.logLevels = {
+        debug: 0,
+        info: 1,
+        warn: 2,
+        error: 3
+      }, this.logLevelPrefixs = {
+        debug: " DEBUG",
+        info: " INFO",
+        warn: " WARN",
+        error: " ERROR"
+      }, this.logLevel = "info", this.name = t, this.http = new s(this), this.data = null, this.dataFile = "box.dat", this.logs = [], this.isMute = !1, this.isNeedRewrite = !1, this.logSeparator = "\n", this.encoding = "utf-8", this.startTime = new Date().getTime(), Object.assign(this, e), this.log("", `🔔${this.name}, 开始!`);
     }
     getEnv() {
       return "undefined" != typeof $environment && $environment["surge-version"] ? "Surge" : "undefined" != typeof $environment && $environment["stash-version"] ? "Stash" : "undefined" != typeof module && module.exports ? "Node.js" : "undefined" != typeof $task ? "Quantumult X" : "undefined" != typeof $loon ? "Loon" : "undefined" != typeof $rocket ? "Shadowrocket" : void 0;
@@ -453,21 +762,18 @@ function Env(t, e) {
         return e;
       }
     }
-    toStr(t, e = null) {
+    toStr(t, e = null, ...s) {
       try {
-        return JSON.stringify(t);
+        return JSON.stringify(t, ...s);
       } catch {
         return e;
       }
     }
     getjson(t, e) {
       let s = e;
-      const a = this.getdata(t);
-      if (a) {
-        try {
-          s = JSON.parse(this.getdata(t));
-        } catch {}
-      }
+      if (this.getdata(t)) try {
+        s = JSON.parse(this.getdata(t));
+      } catch {}
       return s;
     }
     setjson(t, e) {
@@ -481,51 +787,45 @@ function Env(t, e) {
       return new Promise(e => {
         this.get({
           url: t
-        }, (t, s, a) => e(a));
+        }, (t, s, i) => e(i));
       });
     }
     runScript(t, e) {
       return new Promise(s => {
-        let a = this.getdata("@chavy_boxjs_userCfgs.httpapi");
-        a = a ? a.replace(/\n/g, "").trim() : a;
-        let r = this.getdata("@chavy_boxjs_userCfgs.httpapi_timeout");
-        r = r ? 1 * r : 20;
-        r = e && e.timeout ? e.timeout : r;
-        const [i, o] = a.split("@"),
+        let i = this.getdata("@chavy_boxjs_userCfgs.httpapi");
+        i = i ? i.replace(/\n/g, "").trim() : i;
+        let o = this.getdata("@chavy_boxjs_userCfgs.httpapi_timeout");
+        o = o ? 1 * o : 20, o = e && e.timeout ? e.timeout : o;
+        const [r, a] = i.split("@"),
           n = {
-            url: `http://${o}/v1/scripting/evaluate`,
+            url: `http://${a}/v1/scripting/evaluate`,
             body: {
               script_text: t,
               mock_type: "cron",
-              timeout: r
+              timeout: o
             },
             headers: {
-              "X-Key": i,
+              "X-Key": r,
               Accept: "*/*"
             },
-            timeout: r
+            timeout: o
           };
-        this.post(n, (t, e, a) => s(a));
+        this.post(n, (t, e, i) => s(i));
       }).catch(t => this.logErr(t));
     }
     loaddata() {
-      if (!this.isNode()) {
-        return {};
-      }
+      if (!this.isNode()) return {};
       {
-        this.fs = this.fs ? this.fs : require("fs");
-        this.path = this.path ? this.path : require("path");
+        this.fs = this.fs ? this.fs : require("fs"), this.path = this.path ? this.path : require("path");
         const t = this.path.resolve(this.dataFile),
           e = this.path.resolve(process.cwd(), this.dataFile),
           s = this.fs.existsSync(t),
-          a = !s && this.fs.existsSync(e);
-        if (!s && !a) {
-          return {};
-        }
+          i = !s && this.fs.existsSync(e);
+        if (!s && !i) return {};
         {
-          const a = s ? t : e;
+          const i = s ? t : e;
           try {
-            return JSON.parse(this.fs.readFileSync(a));
+            return JSON.parse(this.fs.readFileSync(i));
           } catch (t) {
             return {};
           }
@@ -534,39 +834,34 @@ function Env(t, e) {
     }
     writedata() {
       if (this.isNode()) {
-        this.fs = this.fs ? this.fs : require("fs");
-        this.path = this.path ? this.path : require("path");
+        this.fs = this.fs ? this.fs : require("fs"), this.path = this.path ? this.path : require("path");
         const t = this.path.resolve(this.dataFile),
           e = this.path.resolve(process.cwd(), this.dataFile),
           s = this.fs.existsSync(t),
-          a = !s && this.fs.existsSync(e),
-          r = JSON.stringify(this.data);
-        s ? this.fs.writeFileSync(t, r) : a ? this.fs.writeFileSync(e, r) : this.fs.writeFileSync(t, r);
+          i = !s && this.fs.existsSync(e),
+          o = JSON.stringify(this.data);
+        s ? this.fs.writeFileSync(t, o) : i ? this.fs.writeFileSync(e, o) : this.fs.writeFileSync(t, o);
       }
     }
     lodash_get(t, e, s) {
-      const a = e.replace(/\[(\d+)\]/g, ".$1").split(".");
-      let r = t;
-      for (const t of a) if (r = Object(r)[t], void 0 === r) {
-        return s;
-      }
-      return r;
+      const i = e.replace(/\[(\d+)\]/g, ".$1").split(".");
+      let o = t;
+      for (const t of i) if (o = Object(o)[t], void 0 === o) return s;
+      return o;
     }
     lodash_set(t, e, s) {
-      return Object(t) !== t ? t : (Array.isArray(e) || (e = e.toString().match(/[^.[\]]+/g) || []), e.slice(0, -1).reduce((t, s, a) => Object(t[s]) === t[s] ? t[s] : t[s] = Math.abs(e[a + 1]) >> 0 == +e[a + 1] ? [] : {}, t)[e[e.length - 1]] = s, t);
+      return Object(t) !== t || (Array.isArray(e) || (e = e.toString().match(/[^.[\]]+/g) || []), e.slice(0, -1).reduce((t, s, i) => Object(t[s]) === t[s] ? t[s] : t[s] = Math.abs(e[i + 1]) >> 0 == +e[i + 1] ? [] : {}, t)[e[e.length - 1]] = s), t;
     }
     getdata(t) {
       let e = this.getval(t);
       if (/^@/.test(t)) {
-        const [, s, a] = /^@(.*?)\.(.*?)$/.exec(t),
-          r = s ? this.getval(s) : "";
-        if (r) {
-          try {
-            const t = JSON.parse(r);
-            e = t ? this.lodash_get(t, a, "") : e;
-          } catch (t) {
-            e = "";
-          }
+        const [, s, i] = /^@(.*?)\.(.*?)$/.exec(t),
+          o = s ? this.getval(s) : "";
+        if (o) try {
+          const t = JSON.parse(o);
+          e = t ? this.lodash_get(t, i, "") : e;
+        } catch (t) {
+          e = "";
         }
       }
       return e;
@@ -574,21 +869,17 @@ function Env(t, e) {
     setdata(t, e) {
       let s = !1;
       if (/^@/.test(e)) {
-        const [, a, r] = /^@(.*?)\.(.*?)$/.exec(e),
-          i = this.getval(a),
-          o = a ? "null" === i ? null : i || "{}" : "{}";
+        const [, i, o] = /^@(.*?)\.(.*?)$/.exec(e),
+          r = this.getval(i),
+          a = i ? "null" === r ? null : r || "{}" : "{}";
         try {
-          const e = JSON.parse(o);
-          this.lodash_set(e, r, t);
-          s = this.setval(JSON.stringify(e), a);
+          const e = JSON.parse(a);
+          this.lodash_set(e, o, t), s = this.setval(JSON.stringify(e), i);
         } catch (e) {
-          const i = {};
-          this.lodash_set(i, r, t);
-          s = this.setval(JSON.stringify(i), a);
+          const r = {};
+          this.lodash_set(r, o, t), s = this.setval(JSON.stringify(r), i);
         }
-      } else {
-        s = this.setval(t, e);
-      }
+      } else s = this.setval(t, e);
       return s;
     }
     getval(t) {
@@ -601,8 +892,7 @@ function Env(t, e) {
         case "Quantumult X":
           return $prefs.valueForKey(t);
         case "Node.js":
-          this.data = this.loaddata();
-          return this.data[t];
+          return this.data = this.loaddata(), this.data[t];
         default:
           return this.data && this.data[t] || null;
       }
@@ -617,22 +907,18 @@ function Env(t, e) {
         case "Quantumult X":
           return $prefs.setValueForKey(t, e);
         case "Node.js":
-          this.data = this.loaddata();
-          this.data[e] = t;
-          this.writedata();
-          return !0;
+          return this.data = this.loaddata(), this.data[e] = t, this.writedata(), !0;
         default:
           return this.data && this.data[e] || null;
       }
     }
     initGotEnv(t) {
-      this.got = this.got ? this.got : require("got");
-      this.cktough = this.cktough ? this.cktough : require("tough-cookie");
-      this.ckjar = this.ckjar ? this.ckjar : new this.cktough.CookieJar();
-      t && (t.headers = t.headers ? t.headers : {}, void 0 === t.headers.Cookie && void 0 === t.cookieJar && (t.cookieJar = this.ckjar));
+      this.got = this.got ? this.got : require("got"), this.cktough = this.cktough ? this.cktough : require("tough-cookie"), this.ckjar = this.ckjar ? this.ckjar : new this.cktough.CookieJar(), t && (t.headers = t.headers ? t.headers : {}, t && (t.headers = t.headers ? t.headers : {}, void 0 === t.headers.cookie && void 0 === t.headers.Cookie && void 0 === t.cookieJar && (t.cookieJar = this.ckjar)));
     }
     get(t, e = () => {}) {
-      switch (t.headers && (delete t.headers["Content-Type"], delete t.headers["Content-Length"], delete t.headers["content-type"], delete t.headers["content-length"]), t.params && (t.url += "?" + this.queryStr(t.params)), this.getEnv()) {
+      switch (t.headers && (delete t.headers["Content-Type"], delete t.headers["Content-Length"], delete t.headers["content-type"], delete t.headers["content-length"]), t.params && (t.url += "?" + this.queryStr(t.params)), void 0 === t.followRedirect || t.followRedirect || ((this.isSurge() || this.isLoon()) && (t["auto-redirect"] = !1), this.isQuanX() && (t.opts ? t.opts.redirection = !1 : t.opts = {
+        redirection: !1
+      })), this.getEnv()) {
         case "Surge":
         case "Loon":
         case "Stash":
@@ -640,73 +926,71 @@ function Env(t, e) {
         default:
           this.isSurge() && this.isNeedRewrite && (t.headers = t.headers || {}, Object.assign(t.headers, {
             "X-Surge-Skip-Scripting": !1
-          }));
-          $httpClient.get(t, (t, s, a) => {
-            !t && s && (s.body = a, s.statusCode = s.status ? s.status : s.statusCode, s.status = s.statusCode);
-            e(t, s, a);
+          })), $httpClient.get(t, (t, s, i) => {
+            !t && s && (s.body = i, s.statusCode = s.status ? s.status : s.statusCode, s.status = s.statusCode), e(t, s, i);
           });
           break;
         case "Quantumult X":
           this.isNeedRewrite && (t.opts = t.opts || {}, Object.assign(t.opts, {
             hints: !1
-          }));
-          $task.fetch(t).then(t => {
+          })), $task.fetch(t).then(t => {
             const {
               statusCode: s,
-              statusCode: a,
-              headers: r,
-              body: i,
-              bodyBytes: o
+              statusCode: i,
+              headers: o,
+              body: r,
+              bodyBytes: a
             } = t;
             e(null, {
               status: s,
-              statusCode: a,
-              headers: r,
-              body: i,
-              bodyBytes: o
-            }, i, o);
+              statusCode: i,
+              headers: o,
+              body: r,
+              bodyBytes: a
+            }, r, a);
           }, t => e(t && t.error || "UndefinedError"));
           break;
         case "Node.js":
           let s = require("iconv-lite");
-          this.initGotEnv(t);
-          this.got(t).on("redirect", (t, e) => {
+          this.initGotEnv(t), this.got(t).on("redirect", (t, e) => {
             try {
               if (t.headers["set-cookie"]) {
                 const s = t.headers["set-cookie"].map(this.cktough.Cookie.parse).toString();
-                s && this.ckjar.setCookieSync(s, null);
-                e.cookieJar = this.ckjar;
+                s && this.ckjar.setCookieSync(s, null), e.cookieJar = this.ckjar;
               }
             } catch (t) {
               this.logErr(t);
             }
           }).then(t => {
             const {
-                statusCode: a,
-                statusCode: r,
-                headers: i,
-                rawBody: o
+                statusCode: i,
+                statusCode: o,
+                headers: r,
+                rawBody: a
               } = t,
-              n = s.decode(o, this.encoding);
+              n = s.decode(a, this.encoding);
             e(null, {
-              status: a,
-              statusCode: r,
-              headers: i,
-              rawBody: o,
+              status: i,
+              statusCode: o,
+              headers: r,
+              rawBody: a,
               body: n
             }, n);
           }, t => {
             const {
-              message: a,
-              response: r
+              message: i,
+              response: o
             } = t;
-            e(a, r, r && s.decode(r.rawBody, this.encoding));
+            e(i, o, o && s.decode(o.rawBody, this.encoding));
           });
+          break;
       }
     }
     post(t, e = () => {}) {
       const s = t.method ? t.method.toLocaleLowerCase() : "post";
-      switch (t.body && t.headers && !t.headers["Content-Type"] && !t.headers["content-type"] && (t.headers["content-type"] = "application/x-www-form-urlencoded"), t.headers && (delete t.headers["Content-Length"], delete t.headers["content-length"]), this.getEnv()) {
+      switch (t.body && t.headers && !t.headers["Content-Type"] && !t.headers["content-type"] && (t.headers["content-type"] = "application/x-www-form-urlencoded"), t.headers && (delete t.headers["Content-Length"], delete t.headers["content-length"]), void 0 === t.followRedirect || t.followRedirect || ((this.isSurge() || this.isLoon()) && (t["auto-redirect"] = !1), this.isQuanX() && (t.opts ? t.opts.redirection = !1 : t.opts = {
+        redirection: !1
+      })), this.getEnv()) {
         case "Surge":
         case "Loon":
         case "Stash":
@@ -714,68 +998,65 @@ function Env(t, e) {
         default:
           this.isSurge() && this.isNeedRewrite && (t.headers = t.headers || {}, Object.assign(t.headers, {
             "X-Surge-Skip-Scripting": !1
-          }));
-          $httpClient[s](t, (t, s, a) => {
-            !t && s && (s.body = a, s.statusCode = s.status ? s.status : s.statusCode, s.status = s.statusCode);
-            e(t, s, a);
+          })), $httpClient[s](t, (t, s, i) => {
+            !t && s && (s.body = i, s.statusCode = s.status ? s.status : s.statusCode, s.status = s.statusCode), e(t, s, i);
           });
           break;
         case "Quantumult X":
-          t.method = s;
-          this.isNeedRewrite && (t.opts = t.opts || {}, Object.assign(t.opts, {
+          t.method = s, this.isNeedRewrite && (t.opts = t.opts || {}, Object.assign(t.opts, {
             hints: !1
-          }));
-          $task.fetch(t).then(t => {
+          })), $task.fetch(t).then(t => {
             const {
               statusCode: s,
-              statusCode: a,
-              headers: r,
-              body: i,
-              bodyBytes: o
+              statusCode: i,
+              headers: o,
+              body: r,
+              bodyBytes: a
             } = t;
             e(null, {
               status: s,
-              statusCode: a,
-              headers: r,
-              body: i,
-              bodyBytes: o
-            }, i, o);
+              statusCode: i,
+              headers: o,
+              body: r,
+              bodyBytes: a
+            }, r, a);
           }, t => e(t && t.error || "UndefinedError"));
           break;
         case "Node.js":
-          let a = require("iconv-lite");
+          let i = require("iconv-lite");
           this.initGotEnv(t);
           const {
-            url: r,
-            ...i
+            url: o,
+            ...r
           } = t;
-          this.got[s](r, i).then(t => {
+          this.got[s](o, r).then(t => {
             const {
                 statusCode: s,
-                statusCode: r,
-                headers: i,
-                rawBody: o
+                statusCode: o,
+                headers: r,
+                rawBody: a
               } = t,
-              n = a.decode(o, this.encoding);
+              n = i.decode(a, this.encoding);
             e(null, {
               status: s,
-              statusCode: r,
-              headers: i,
-              rawBody: o,
+              statusCode: o,
+              headers: r,
+              rawBody: a,
               body: n
             }, n);
           }, t => {
             const {
               message: s,
-              response: r
+              response: o
             } = t;
-            e(s, r, r && a.decode(r.rawBody, this.encoding));
+            e(s, o, o && i.decode(o.rawBody, this.encoding));
           });
+          break;
       }
     }
     time(t, e = null) {
       const s = e ? new Date(e) : new Date();
-      let a = {
+      let i = {
         "M+": s.getMonth() + 1,
         "d+": s.getDate(),
         "H+": s.getHours(),
@@ -785,20 +1066,25 @@ function Env(t, e) {
         S: s.getMilliseconds()
       };
       /(y+)/.test(t) && (t = t.replace(RegExp.$1, (s.getFullYear() + "").substr(4 - RegExp.$1.length)));
-      for (let e in a) new RegExp("(" + e + ")").test(t) && (t = t.replace(RegExp.$1, 1 == RegExp.$1.length ? a[e] : ("00" + a[e]).substr(("" + a[e]).length)));
+      for (let e in i) new RegExp("(" + e + ")").test(t) && (t = t.replace(RegExp.$1, 1 == RegExp.$1.length ? i[e] : ("00" + i[e]).substr(("" + i[e]).length)));
       return t;
     }
     queryStr(t) {
       let e = "";
       for (const s in t) {
-        let a = t[s];
-        null != a && "" !== a && ("object" == typeof a && (a = JSON.stringify(a)), e += `${s}=${a}&`);
+        let i = t[s];
+        null != i && "" !== i && ("object" == typeof i && (i = JSON.stringify(i)), e += `${s}=${i}&`);
       }
-      e = e.substring(0, e.length - 1);
-      return e;
+      return e = e.substring(0, e.length - 1), e;
     }
-    msg(e = t, s = "", a = "", r) {
-      const i = t => {
+    msg(e = t, s = "", i = "", o = {}) {
+      const r = t => {
+        const {
+          $open: e,
+          $copy: s,
+          $media: i,
+          $mediaMime: o
+        } = t;
         switch (typeof t) {
           case void 0:
             return t;
@@ -827,30 +1113,73 @@ function Env(t, e) {
               case "Shadowrocket":
               default:
                 {
-                  let e = t.url || t.openUrl || t["open-url"];
-                  return {
-                    url: e
-                  };
+                  const r = {};
+                  let a = t.openUrl || t.url || t["open-url"] || e;
+                  a && Object.assign(r, {
+                    action: "open-url",
+                    url: a
+                  });
+                  let n = t["update-pasteboard"] || t.updatePasteboard || s;
+                  if (n && Object.assign(r, {
+                    action: "clipboard",
+                    text: n
+                  }), i) {
+                    let t, e, s;
+                    if (i.startsWith("http")) t = i;else if (i.startsWith("data:")) {
+                      const [t] = i.split(";"),
+                        [, o] = i.split(",");
+                      e = o, s = t.replace("data:", "");
+                    } else {
+                      e = i, s = (t => {
+                        const e = {
+                          JVBERi0: "application/pdf",
+                          R0lGODdh: "image/gif",
+                          R0lGODlh: "image/gif",
+                          iVBORw0KGgo: "image/png",
+                          "/9j/": "image/jpg"
+                        };
+                        for (var s in e) if (0 === t.indexOf(s)) return e[s];
+                        return null;
+                      })(i);
+                    }
+                    Object.assign(r, {
+                      "media-url": t,
+                      "media-base64": e,
+                      "media-base64-mime": o ?? s
+                    });
+                  }
+                  return Object.assign(r, {
+                    "auto-dismiss": t["auto-dismiss"],
+                    sound: t.sound
+                  }), r;
                 }
               case "Loon":
                 {
-                  let e = t.openUrl || t.url || t["open-url"],
-                    s = t.mediaUrl || t["media-url"];
-                  return {
-                    openUrl: e,
-                    mediaUrl: s
-                  };
+                  const s = {};
+                  let o = t.openUrl || t.url || t["open-url"] || e;
+                  o && Object.assign(s, {
+                    openUrl: o
+                  });
+                  let r = t.mediaUrl || t["media-url"];
+                  return i?.startsWith("http") && (r = i), r && Object.assign(s, {
+                    mediaUrl: r
+                  }), console.log(JSON.stringify(s)), s;
                 }
               case "Quantumult X":
                 {
-                  let e = t["open-url"] || t.url || t.openUrl,
-                    s = t["media-url"] || t.mediaUrl,
-                    a = t["update-pasteboard"] || t.updatePasteboard;
-                  return {
-                    "open-url": e,
-                    "media-url": s,
-                    "update-pasteboard": a
-                  };
+                  const o = {};
+                  let r = t["open-url"] || t.url || t.openUrl || e;
+                  r && Object.assign(o, {
+                    "open-url": r
+                  });
+                  let a = t["media-url"] || t.mediaUrl;
+                  i?.startsWith("http") && (a = i), a && Object.assign(o, {
+                    "media-url": a
+                  });
+                  let n = t["update-pasteboard"] || t.updatePasteboard || s;
+                  return n && Object.assign(o, {
+                    "update-pasteboard": n
+                  }), console.log(JSON.stringify(o)), o;
                 }
               case "Node.js":
                 return;
@@ -859,33 +1188,39 @@ function Env(t, e) {
             return;
         }
       };
-      if (!this.isMute) {
-        switch (this.getEnv()) {
-          case "Surge":
-          case "Loon":
-          case "Stash":
-          case "Shadowrocket":
-          default:
-            $notification.post(e, s, a, i(r));
-            break;
-          case "Quantumult X":
-            $notify(e, s, a, i(r));
-            break;
-          case "Node.js":
-        }
+      if (!this.isMute) switch (this.getEnv()) {
+        case "Surge":
+        case "Loon":
+        case "Stash":
+        case "Shadowrocket":
+        default:
+          $notification.post(e, s, i, r(o));
+          break;
+        case "Quantumult X":
+          $notify(e, s, i, r(o));
+          break;
+        case "Node.js":
+          break;
       }
       if (!this.isMuteLog) {
         let t = ["", "==============\uD83D\uDCE3\u7CFB\u7EDF\u901A\u77E5\uD83D\uDCE3=============="];
-        t.push(e);
-        s && t.push(s);
-        a && t.push(a);
-        console.log(t.join("\n"));
-        this.logs = this.logs.concat(t);
+        t.push(e), s && t.push(s), i && t.push(i), console.log(t.join("\n")), this.logs = this.logs.concat(t);
       }
     }
+    debug(...t) {
+      this.logLevels[this.logLevel] <= this.logLevels.debug && (t.length > 0 && (this.logs = [...this.logs, ...t]), console.log(`[${this.time("HH:mm:ss")}${this.logLevelPrefixs.debug}] ${t.map(t => t ?? String(t)).join(this.logSeparator)}`));
+    }
+    info(...t) {
+      this.logLevels[this.logLevel] <= this.logLevels.info && (t.length > 0 && (this.logs = [...this.logs, ...t]), console.log(`[${this.time("HH:mm:ss")}${this.logLevelPrefixs.info}] ${t.map(t => t ?? String(t)).join(this.logSeparator)}`));
+    }
+    warn(...t) {
+      this.logLevels[this.logLevel] <= this.logLevels.warn && (t.length > 0 && (this.logs = [...this.logs, ...t]), console.log(`[${this.time("HH:mm:ss")}${this.logLevelPrefixs.warn}] ${t.map(t => t ?? String(t)).join(this.logSeparator)}`));
+    }
+    error(...t) {
+      this.logLevels[this.logLevel] <= this.logLevels.error && (t.length > 0 && (this.logs = [...this.logs, ...t]), console.log(`[${this.time("HH:mm:ss")}${this.logLevelPrefixs.error}] ${t.map(t => t ?? String(t)).join(this.logSeparator)}`));
+    }
     log(...t) {
-      t.length > 0 && (this.logs = [...this.logs, ...t]);
-      console.log(t.join(this.logSeparator));
+      t.length > 0 && (this.logs = [...this.logs, ...t]), console.log(t.map(t => t ?? String(t)).join(this.logSeparator));
     }
     logErr(t, e) {
       switch (this.getEnv()) {
@@ -895,19 +1230,19 @@ function Env(t, e) {
         case "Shadowrocket":
         case "Quantumult X":
         default:
-          this.log("", `❗️${this.name}, 错误!`, t);
+          this.log("", `❗️${this.name}, 错误!`, e, t);
           break;
         case "Node.js":
-          this.log("", `❗️${this.name}, 错误!`, t.stack);
+          this.log("", `❗️${this.name}, 错误!`, e, void 0 !== t.message ? t.message : t, t.stack);
+          break;
       }
     }
     wait(t) {
       return new Promise(e => setTimeout(e, t));
     }
     done(t = {}) {
-      const e = new Date().getTime(),
-        s = (e - this.startTime) / 1000;
-      switch (this.log("", `🔔${this.name}, 结束! 🕛 ${s} 秒`), this.log(), this.getEnv()) {
+      const e = (new Date().getTime() - this.startTime) / 1000;
+      switch (this.log("", `🔔${this.name}, 结束! 🕛 ${e} 秒`), this.log(), this.getEnv()) {
         case "Surge":
         case "Loon":
         case "Stash":
