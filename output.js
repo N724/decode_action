@@ -1,7 +1,10 @@
+//Sat Jun 29 2024 11:08:36 GMT+0000 (Coordinated Universal Time)
+//Base:https://github.com/echo094/decode-js
+//Modify:https://github.com/smallfawn/decode_action
 //Sat Jun 29 2024 10:47:45 GMT+0000 (Coordinated Universal Time)
 //Base:https://github.com/echo094/decode-js
 //Modify:https://github.com/smallfawn/decode_action
-const $ = new Env("晓晓优选"),
+const $ = new Env("\u6653\u6653\u4F18\u9009"),
   ckName = "xxyx_data";
 $.appid = "";
 const Notify = 1,
@@ -20,10 +23,10 @@ $.wxCode = $.codeOpen != "false" && $.codeServer && $.appid;
 async function main() {
   try {
     await getNotice();
-    $.log("\n================== 任务 ==================\n");
+    $.log("\n================== \u4EFB\u52A1 ==================\n");
     for (let _0x23c860 of userList) {
-      console.log("🔷账号" + _0x23c860.index + " >> Start work");
-      console.log("随机延迟" + _0x23c860.getRandomTime() + "ms");
+      console.log("\uD83D\uDD37\u8D26\u53F7" + _0x23c860.index + " >> Start work");
+      console.log("\u968F\u673A\u5EF6\u8FDF" + _0x23c860.getRandomTime() + "ms");
       let _0x1638c2 = await _0x23c860.getUserEnergy();
       if (_0x23c860.ckStatus) {
         await _0x23c860.signin();
@@ -32,16 +35,16 @@ async function main() {
         for (let _0x58cec7 of _0x18f577) {
           for (let _0x358941 = 0; _0x358941 < _0x58cec7?.["dailyCount"]; _0x358941++) {
             await _0x23c860.completeTask(_0x58cec7?.["taskId"]);
-            $.log(_0x58cec7?.["taskName"] + ":调用成功!");
+            $.log(_0x58cec7?.["taskName"] + ":\u8C03\u7528\u6210\u529F!");
           }
         }
         let _0x3029a8 = await _0x23c860.getUserEnergy(),
           _0x4a2821 = await _0x23c860.getUserInfo();
-        $.title = "「" + _0x4a2821?.["nick"] + "」本次运行共获得" + (_0x3029a8 - _0x1638c2) + "能量";
+        $.title = "\u300C" + _0x4a2821?.["nick"] + "\u300D\u672C\u6B21\u8FD0\u884C\u5171\u83B7\u5F97" + (_0x3029a8 - _0x1638c2) + "\u80FD\u91CF";
         _0x18f577 = await _0x23c860.getTaskList();
-        _0x18f577.map(_0x5e1dff => DoubleLog(_0x5e1dff.taskName + ":" + (_0x5e1dff.isCompleted == 1 ? "已完成" : "未完成")));
+        _0x18f577.map(_0x5e1dff => DoubleLog(_0x5e1dff.taskName + ":" + (_0x5e1dff.isCompleted == 1 ? "\u5DF2\u5B8C\u6210" : "\u672A\u5B8C\u6210")));
       } else {
-        $.notifyMsg.push("❌账号" + _0x23c860.index + " >> Check ck error!");
+        $.notifyMsg.push("\u274C\u8D26\u53F7" + _0x23c860.index + " >> Check ck error!");
       }
       $.notifyList.push({
         id: _0x23c860.index,
@@ -51,7 +54,7 @@ async function main() {
       $.notifyMsg = [];
     }
   } catch (_0x5db4b7) {
-    $.log("❌main run error => " + _0x5db4b7);
+    $.log("\u274Cmain run error => " + _0x5db4b7);
   }
 }
 class UserInfo {
@@ -90,12 +93,12 @@ class UserInfo {
         const _0x15b9df = await Request(_0x18874b);
         debug(_0x15b9df, _0xda01b7?.["url"]?.["replace"](/\/+$/, "")["substring"](_0xda01b7?.["url"]?.["lastIndexOf"]("/") + 1));
         if (_0x15b9df?.["code"] == 401) {
-          throw new Error("用户需要去登录");
+          throw new Error("\u7528\u6237\u9700\u8981\u53BB\u767B\u5F55");
         }
         return _0x15b9df;
       } catch (_0x11c343) {
         this.ckStatus = false;
-        $.log("❌请求发起失败！" + _0x11c343);
+        $.log("\u274C\u8BF7\u6C42\u53D1\u8D77\u5931\u8D25\uFF01" + _0x11c343);
       }
     };
   }
@@ -108,7 +111,7 @@ class UserInfo {
       };
       return await this.fetch(_0x516f33);
     } catch (_0x49c2bc) {
-      console.log("❌任务失败！原因为:" + _0x49c2bc);
+      console.log("\u274C\u4EFB\u52A1\u5931\u8D25\uFF01\u539F\u56E0\u4E3A:" + _0x49c2bc);
     }
   }
   async getTaskList() {
@@ -117,7 +120,7 @@ class UserInfo {
         _0xdfac7a = _0x31825b?.["data"]["filter"](_0x763ea1 => _0x763ea1.taskName.match(/每日签到|分享海报|观看视频/));
       return _0xdfac7a;
     } catch (_0x37dd6b) {
-      console.log("❌任务失败！原因为:" + _0x37dd6b);
+      console.log("\u274C\u4EFB\u52A1\u5931\u8D25\uFF01\u539F\u56E0\u4E3A:" + _0x37dd6b);
     }
   }
   async completeTask(_0x204464) {
@@ -129,7 +132,7 @@ class UserInfo {
       };
       return await this.fetch(_0x5bdae6);
     } catch (_0x464519) {
-      console.log("❌任务失败！原因为:" + _0x464519);
+      console.log("\u274C\u4EFB\u52A1\u5931\u8D25\uFF01\u539F\u56E0\u4E3A:" + _0x464519);
     }
   }
   async getUserEnergy() {
@@ -137,7 +140,7 @@ class UserInfo {
       let _0x5c9714 = await this.fetch("/client/energy/mall/getUserEnergy?platform=ios");
       return _0x5c9714?.["data"]?.["energy"];
     } catch (_0x1cf0fa) {
-      console.log("❌任务失败！原因为:" + _0x1cf0fa);
+      console.log("\u274C\u4EFB\u52A1\u5931\u8D25\uFF01\u539F\u56E0\u4E3A:" + _0x1cf0fa);
     }
   }
   async getUserInfo() {
@@ -146,7 +149,7 @@ class UserInfo {
       this.avatar = _0x15e6ea?.["data"]?.["avatar"];
       return _0x15e6ea?.["data"];
     } catch (_0x51a20b) {
-      console.log("❌任务失败！原因为:" + _0x51a20b);
+      console.log("\u274C\u4EFB\u52A1\u5931\u8D25\uFF01\u539F\u56E0\u4E3A:" + _0x51a20b);
     }
   }
 }
@@ -157,7 +160,7 @@ async function getCookie() {
   const _0x5b67b3 = ObjectKeys2LowerCase($request.headers),
     _0x1c475c = $.toObj($response.body);
   if (!(_0x1c475c && _0x5b67b3["xx-token"])) {
-    $.msg($.name, "❌获取token失败!", "");
+    $.msg($.name, "\u274C\u83B7\u53D6token\u5931\u8D25!", "");
     return;
   }
   const {
@@ -175,14 +178,14 @@ async function getCookie() {
   const _0x10b511 = userCookie.findIndex(_0x10639c => _0x10639c.userId == _0x4b0a6f.userId);
   userCookie[_0x10b511] ? userCookie[_0x10b511] = _0x4b0a6f : userCookie.push(_0x4b0a6f);
   $.setjson(userCookie, ckName);
-  $.msg($.name, "🎉" + _0x4b0a6f.userName + "更新token成功!", "");
+  $.msg($.name, "\uD83C\uDF89" + _0x4b0a6f.userName + "\u66F4\u65B0token\u6210\u529F!", "");
 }
 async function loadModule() {
   try {
     $.SakuraUtils = await loadSakuraUtils();
     return $.SakuraUtils ? true : false;
   } catch (_0x4d390c) {
-    throw new Error("❌loadModule run error => " + _0x4d390c);
+    throw new Error("\u274CloadModule run error => " + _0x4d390c);
   }
 }
 async function getWxToken(_0x411665) {
@@ -199,7 +202,7 @@ async function getWxToken(_0x411665) {
       _0x43b567 = "Bearer " + _0x5e71ff?.["data"]?.["token"]?.["access_token"];
     return _0x43b567;
   } catch (_0x27cb3a) {
-    $.log("❌getWxToken run error => " + _0x27cb3a);
+    $.log("\u274CgetWxToken run error => " + _0x27cb3a);
   }
 }
 async function checkCodeServer() {
@@ -210,7 +213,7 @@ async function checkCodeServer() {
     }))?.["split"]("|") || [];
     _0x23abfc = _0x23abfc.filter(_0x1cb843 => _0x1cb843.toString().length === 32);
     debug(_0x23abfc);
-    !_0x23abfc.length ? $.log("❌获取code授权失败！请检查服务器运行是否正常 => 尝试读取数据持久化 ") : $.log("✅获取code授权成功！当前code数量为" + _0x23abfc.length);
+    !_0x23abfc.length ? $.log("\u274C\u83B7\u53D6code\u6388\u6743\u5931\u8D25\uFF01\u8BF7\u68C0\u67E5\u670D\u52A1\u5668\u8FD0\u884C\u662F\u5426\u6B63\u5E38 => \u5C1D\u8BD5\u8BFB\u53D6\u6570\u636E\u6301\u4E45\u5316 ") : $.log("\u2705\u83B7\u53D6code\u6388\u6743\u6210\u529F\uFF01\u5F53\u524Dcode\u6570\u91CF\u4E3A" + _0x23abfc.length);
     let _0x56a112 = await Promise.all(_0x23abfc.map(async _0x30c29c => {
       const _0x18dbf4 = await getWxToken(_0x30c29c),
         _0x555604 = {
@@ -221,7 +224,7 @@ async function checkCodeServer() {
     _0x56a112 = _0x56a112.filter(_0x22693b => Object.keys(_0x22693b).length !== 0);
     return _0x56a112;
   } catch (_0x2b3eb0) {
-    $.log("❌checkCodeServer run error => " + _0x2b3eb0);
+    $.log("\u274CcheckCodeServer run error => " + _0x2b3eb0);
   }
 }
 async function checkEnv() {
@@ -231,7 +234,7 @@ async function checkEnv() {
       _0x554a64 = (await checkCodeServer()) || [];
     } else {
       if (!userCookie || !userCookie.length) {
-        console.log("未找到CK");
+        console.log("\u672A\u627E\u5230CK");
         return;
       }
     }
@@ -242,10 +245,10 @@ async function checkEnv() {
     }
     userList.push(..._0x554a64.map(_0x34ed4a => new UserInfo(_0x34ed4a)).filter(Boolean));
     userCount = userList.length;
-    console.log("共找到" + userCount + "个账号");
+    console.log("\u5171\u627E\u5230" + userCount + "\u4E2A\u8D26\u53F7");
     return true;
   } catch (_0x5b0d10) {
-    throw new Error("❌checkEnv run error => " + _0x5b0d10);
+    throw new Error("\u274CcheckEnv run error => " + _0x5b0d10);
   }
 }
 async function Request(_0x2880b1) {
@@ -256,7 +259,7 @@ async function Request(_0x2880b1) {
   }
   try {
     if (!_0x2880b1?.["url"]) {
-      throw new Error("[发送请求] 缺少 url 参数");
+      throw new Error("[\u53D1\u9001\u8BF7\u6C42] \u7F3A\u5C11 url \u53C2\u6570");
     }
     let {
       url: _0x237507,
@@ -287,10 +290,10 @@ async function Request(_0x2880b1) {
           params: _0x50c5e8
         })
       },
-      _0x27a0d4 = $.http[_0x21b121.toLowerCase()](_0x586edb).then(_0x2a3e1c => responseType == "data" ? $.toObj(_0x2a3e1c.body) || _0x2a3e1c.body : $.toObj(_0x2a3e1c) || _0x2a3e1c).catch(_0x44392d => $.log("❌请求发起失败！原因为：" + _0x44392d));
-    return Promise.race([new Promise((_0x170069, _0x43b96c) => setTimeout(() => _0x43b96c("当前请求已超时"), _0x98c3b)), _0x27a0d4]);
+      _0x27a0d4 = $.http[_0x21b121.toLowerCase()](_0x586edb).then(_0x2a3e1c => responseType == "data" ? $.toObj(_0x2a3e1c.body) || _0x2a3e1c.body : $.toObj(_0x2a3e1c) || _0x2a3e1c).catch(_0x44392d => $.log("\u274C\u8BF7\u6C42\u53D1\u8D77\u5931\u8D25\uFF01\u539F\u56E0\u4E3A\uFF1A" + _0x44392d));
+    return Promise.race([new Promise((_0x170069, _0x43b96c) => setTimeout(() => _0x43b96c("\u5F53\u524D\u8BF7\u6C42\u5DF2\u8D85\u65F6"), _0x98c3b)), _0x27a0d4]);
   } catch (_0x156381) {
-    console.log("❌请求发起失败！原因为：" + _0x156381);
+    console.log("\u274C\u8BF7\u6C42\u53D1\u8D77\u5931\u8D25\uFF01\u539F\u56E0\u4E3A\uFF1A" + _0x156381);
   }
 }
 function randomInt(_0x4dcd69, _0x163edf) {
@@ -319,9 +322,9 @@ async function getNotice() {
   const _0x513c13 = ["https://raw.githubusercontent.com/Sliverkiss/GoodNight/main/notice.json", "https://raw.githubusercontent.com/Sliverkiss/GoodNight/main/tip.json"];
   try {
     const _0x4d2c38 = await Promise.all(_0x513c13.map(_0x4e76eb => Request(_0x4e76eb)));
-    _0x4d2c38.map(_0x51aab7 => console.log(_0x51aab7?.["notice"] || "获取通知失败"));
+    _0x4d2c38.map(_0x51aab7 => console.log(_0x51aab7?.["notice"] || "\u83B7\u53D6\u901A\u77E5\u5931\u8D25"));
   } catch (_0x202dbb) {
-    console.log("❌获取通知时发生错误：" + _0x202dbb);
+    console.log("\u274C\u83B7\u53D6\u901A\u77E5\u65F6\u53D1\u751F\u9519\u8BEF\uFF1A" + _0x202dbb);
   }
 }
 async function SendMsgList(_0x423525) {
@@ -347,17 +350,17 @@ function ObjectKeys2LowerCase(_0x4fbf9e) {
 async function loadSakuraUtils() {
   let _0x5970f4 = ($.isNode() ? process.env.SakuraUtil_code : $.getdata("SakuraUtil_code")) || "";
   if (_0x5970f4 && Object.keys(_0x5970f4).length) {
-    console.log("✅" + $.name + ":缓存中存在SakuraUtil代码,跳过下载");
+    console.log("\u2705" + $.name + ":\u7F13\u5B58\u4E2D\u5B58\u5728SakuraUtil\u4EE3\u7801,\u8DF3\u8FC7\u4E0B\u8F7D");
     eval(_0x5970f4);
     return creatUtils();
   }
-  console.log("🚀" + $.name + ":开始下载SakuraUtil代码");
+  console.log("\uD83D\uDE80" + $.name + ":\u5F00\u59CB\u4E0B\u8F7DSakuraUtil\u4EE3\u7801");
   return new Promise(async _0x52bc58 => {
     $.getScript("https://cdn.jsdelivr.net/gh/Sliverkiss/QuantumultX@main/Utils/SakuraUtil.js").then(_0x31adee => {
       $.setdata(_0x31adee, "SakuraUtil_code");
       eval(_0x31adee);
       const _0x4ade8f = creatUtils();
-      console.log("✅SakuraUtil加载成功,请继续");
+      console.log("\u2705SakuraUtil\u52A0\u8F7D\u6210\u529F,\u8BF7\u7EE7\u7EED");
       _0x52bc58(_0x4ade8f);
     });
   });
@@ -367,10 +370,10 @@ async function loadSakuraUtils() {
     await getCookie();
   } else {
     if (!(await loadModule())) {
-      throw new Error("❌加载模块失败，请检查模块路径是否正常");
+      throw new Error("\u274C\u52A0\u8F7D\u6A21\u5757\u5931\u8D25\uFF0C\u8BF7\u68C0\u67E5\u6A21\u5757\u8DEF\u5F84\u662F\u5426\u6B63\u5E38");
     }
     if (!(await checkEnv())) {
-      throw new Error("❌未检测到ck，请添加环境变量");
+      throw new Error("\u274C\u672A\u68C0\u6D4B\u5230ck\uFF0C\u8BF7\u6DFB\u52A0\u73AF\u5883\u53D8\u91CF");
     }
     if (userList.length > 0) {
       await main();
@@ -872,7 +875,7 @@ function Env(t, e) {
         }
       }
       if (!this.isMuteLog) {
-        let t = ["", "==============📣系统通知📣=============="];
+        let t = ["", "==============\uD83D\uDCE3\u7CFB\u7EDF\u901A\u77E5\uD83D\uDCE3=============="];
         t.push(e);
         s && t.push(s);
         a && t.push(a);
