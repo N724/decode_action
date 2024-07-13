@@ -1,14 +1,13 @@
-#2024-07-13 07:30:29
+#2024-07-13 08:37:21
 import requests
 import time
 import os
-from urllib.parse import urlparse,parse_qs,quote
-import re
-import random
-import math
-code="可乐阅读"
-ver="1.5"
-envname="yuanshen_klyd"
+import base64
+from datetime import datetime
+import hashlib
+code="洽谈"
+ver="1.0"
+envname="yuanshen_qiatan"
 split_chars=['@','&','\n']
 debug=False
 debugcookie=""
@@ -53,116 +52,34 @@ def env(*args,**kwargs):
  print(f"本次脚本总运行时间: [{execution_time:.2f}] 秒")
 class yuanshen:
  def __init__(self,cookie)->None:
-  self.fuck_list=[1,2,126]
-  self.biz_list=['MzkwNTY1MzYxOQ==','MzA3NzMzNjMwMQ==']
-  self.cookies={"udtauth12":cookie}
- def tuisong(self):
-  url=f"https://wxpusher.zjiecode.com/api/send/message/?appToken={appToken}&topicId={topicIds}&content=检测文章%0A请在20秒内完成验证!%0A%3Cbody+onload%3D%22window.location.href%3D%27{quote(self.readurl)}%27%22%3E"
-  r=requests.get(url).json()
-  print(f"🎉️检测文章推送结果{r}")
- def getmain(self):
-  h={"Host":"m.zzyi4cf7z8.cn","Connection":"keep-alive","sec-ch-ua":"Chromium;v=122, Not(A:Brand;v=24, Android","sec-ch-ua-mobile":"?1","User-Agent":"Mozilla/5.0 (Linux; Android 14; 23113RKC6C Build/UKQ1.230804.001; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/122.0.6261.120 Mobile Safari/537.36 XWEB/1220133 MMWEBSDK/20240404 MMWEBID/5295 MicroMessenger/8.0.49.2600(0x2800315A) WeChat/arm64 Weixin NetType/WIFI Language/zh_CN ABI/arm64","sec-ch-ua-platform":"Android","Accept":"*/*","Origin":"https://zxrk0408154501-1317547672.cos.ap-nanjing.myqcloud.com","X-Requested-With":"com.tencent.mm","Sec-Fetch-Site":"cross-site","Sec-Fetch-Mode":"cors","Sec-Fetch-Dest":"empty","Referer":"https://zxrk0408154501-1317547672.cos.ap-nanjing.myqcloud.com/","Accept-Encoding":"gzip, deflate, br"}
-  url='https://m.zzyi4cf7z8.cn/entry/new_ld'
-  r=requests.get(url,headers=h).json()
-  j=urlparse(r['jump'])
-  self.mainurl=j.netloc
-  self.headers={"Host":self.mainurl,"Connection":"keep-alive","Accept":"application/json, text/plain, */*","User-Agent":"Mozilla/5.0 (Linux; Android 14; 23113RKC6C Build/UKQ1.230804.001; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/122.0.6261.120 Mobile Safari/537.36 XWEB/1220133 MMWEBSDK/20240404 MMWEBID/5295 MicroMessenger/8.0.49.2600(0x2800315A) WeChat/arm64 Weixin NetType/WIFI Language/zh_CN ABI/arm64","X-Requested-With":"XMLHttpRequest","Referer":f"http://{self.mainurl}/new?upuid=2306406","Accept-Encoding":"gzip, deflate","Accept-Language":"zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7"}
-  print(f"获取到主域名:[{self.mainurl}]")
- def getdomain(self):
-  url=f'http://{self.mainurl}/tuijian?url='
-  r=requests.get(url,headers=self.headers,cookies=self.cookies).json()
-  if r['code']==0:
-   self.today_num=int(r["data"]["infoView"]["num"])
-   try:
-    print(r["data"]["infoView"]["msg"])
-    return False
-   except:
-    pass
-  url=f'http://{self.mainurl}/new/bbbbb'
-  r=requests.get(url,headers=self.headers,cookies=self.cookies)
-  self.domain=r.json()['jump']
-  j=urlparse(self.domain)
-  p=parse_qs(self.domain.split('?')[1])
-  self.iu=p.get('iu',[None])[0]
-  self.domain_url=j.netloc
-  print(f"获取域名成功:[{self.domain_url}][{self.iu}]")
-  time.sleep(2)
-  self.readh={"Host":self.domain_url,"Connection":"keep-alive","Upgrade-Insecure-Requests":"1","User-Agent":"Mozilla/5.0 (Linux; Android 14; 23113RKC6C Build/UKQ1.230804.001; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/122.0.6261.120 Mobile Safari/537.36 XWEB/1220133 MMWEBSDK/20240404 MMWEBID/5295 MicroMessenger/8.0.49.2600(0x2800315A) WeChat/arm64 Weixin NetType/WIFI Language/zh_CN ABI/arm64","Accept":"text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/wxpic,image/tpg,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7","X-Requested-With":"com.tencent.mm","Accept-Encoding":"gzip, deflate","Accept-Language":"zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7"}
-  r=requests.get(self.domain,headers=self.readh,allow_redirects=False)
-  match=re.search(r"var dr_url = '(.*)'",r.text)
-  if match:
-   self.canshu=match.group(1)
-   print("Get 阅读参数----Ok!")
-  else:
-   print("发生未知错误 获取参数失败")
-   exit()
-  print("="*30)
-  return True
- def read(self):
-  self.readh2={"Host":self.domain_url,"Connection":"keep-alive","Accept":"application/json, text/plain, */*","User-Agent":"Mozilla/5.0 (Linux; Android 14; 23113RKC6C Build/UKQ1.230804.001; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/122.0.6261.120 Mobile Safari/537.36 XWEB/1220133 MMWEBSDK/20240501 MMWEBID/5295 MicroMessenger/8.0.50.2701(0x28003251) WeChat/arm64 Weixin NetType/5G Language/zh_CN ABI/arm64","X-Requested-With":"com.tencent.mm","Referer":f"http://{self.domain_url}/dodoaa/ttdd/","Accept-Encoding":"gzip, deflate","Accept-Language":"zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7"}
-  print(f"今日已读:[{self.today_num}]篇文章")
-  jkey=None
-  time.sleep(random.randint(2,5))
-  while True:
-   r=random.random()
-   if jkey is None:
-    url=f"http://{self.domain_url}{self.canshu}?iu={self.iu}&pageshow&r={r}"
-   else:
-    url=f"http://{self.domain_url}{self.canshu}?iu={self.iu}&pageshow&jkey={jkey}"
-   r=requests.get(url,headers=self.readh2).json()
-   try:
-    jkey=r["jkey"]
-    self.readurl=r['url']
-   except:
-    print(f"获取文章链接失败[{r}]")
-    break
-   print(f"第[{self.today_num}]次获取文章成功:[{r['url']}]")
-   k=urlparse(self.readurl)
-   biz=parse_qs(k.query).get('__biz',[''])[0]if '__biz' in parse_qs(k.query)else ''
-   if biz in self.biz_list or self.today_num in self.fuck_list:
-    print('遇到检测文章，推送ing....')
-    self.tuisong()
-    time.sleep(random.randint(20,26))
-   else:
-    time.sleep(random.randint(8,18))
-   self.today_num+=1
- def userinfo(self):
-  url=f'http://{self.mainurl}/tuijian?url='
-  r=requests.get(url,headers=self.headers,cookies=self.cookies).json()
-  if r['code']==0:
-   gold=float(r['data']['user']['score'])*100
-   print(f'今日已赚金币:[{float(r["data"]["infoView"]["score"])*100}]\n当前账号剩余金币:[{gold}] = [{gold/10000}]元')
-   if gold>=withdrawal_money:
-    self.withdrawal()
-   else:
-    print(f"金币余额不足[{withdrawal_money}] 不提现")
-  else:
-   print(f"查询个人余额失败:[{r}]")
- def withdrawal(self):
-  url=f'http://{self.mainurl}/withdrawal'
-  r=requests.get(url,headers=self.headers,cookies=self.cookies).json()
-  if r['code']==0:
-   score=math.floor(float(r['data']['user']['score']))
-   data={'amount':score,'type':'wx'}
-   url=f'http://{self.mainurl}/withdrawal/doWithdraw'
-   r=requests.post(url,data=data,headers=self.headers,cookies=self.cookies)
-   print(f"提现结果:[{r.text}]")
+  cookie=cookie.split("#")
+  self.h={"os":"android","appVersionCode":"2","appVersionName":"1.0.1","datetime":"2024-07-12 07:32:02.722","timestamp":"1720740722","nonce":"97d4877b6a40fece19ae9987136af494","sign":"5583a53be346aa13b79d8d32d35689fe0c5c49b0","DeviceId":cookie[1],"Accept":"application/json","Authorization":cookie[0],"Local":"1","Content-Length":"0","Host":"app.chatchaton.com","Connection":"Keep-Alive","Accept-Encoding":"gzip","User-Agent":"okhttp/4.10.0"}
+ def gheader(self):
+  def b():
+   def a(bArr):
+    return base64.b64encode(bArr).decode('utf-8')
+   bArr=os.urandom(16)
+   return a(bArr)
+  def generate_sha1(input_string):
+   hash_object=hashlib.sha1(input_string.encode())
+   hash_hex=hash_object.hexdigest()
+   return hash_hex
+  str_salt='dcd679c4feb548cf46dc6e87f1eec40e0b7df254da39a3ee5e6b4b0d3255bfef95601890afd80709'
+  timetamp=int(time.time())
+  self.h["timestamp"]=str(timetamp)
+  nonce=b()
+  self.h["nonce"]=nonce
+  sign=generate_sha1(str_salt+str(timetamp)+nonce)
+  self.h["sign"]=sign
+  times=datetime.now().strftime('%Y-%m-%d %H:%M:%S.722')
+  self.h["datetime"]=times
+  print(times)
+ def sign(self):
+  self.gheader()
+  url='https://app.chatchaton.com/api/v2/mining/start'
+  r=requests.post(url,headers=self.h).json()
+  print("签到结果",r)
  def main(self):
-  self.getmain()
-  time.sleep(random.randint(2,5))
-  if self.getdomain():
-   self.read()
-  self.userinfo()
+  self.sign()
 if __name__=='__main__':
- appToken=''
- topicIds=''
- if debug:
-  appToken='AT_hlSclrcFUoJIk6JcAtGqZCiyB8lnDkBa'
-  topicIds='24878'
- if not appToken or not topicIds:
-  appToken=os.getenv('yuanshen_apptoken')
-  topicIds=os.getenv('yuanshen_topicid')
-  if not appToken or not topicIds:
-   print("❌你还没有设置推送,请设置环境变量:yuanshen_topicid和yuanshen_apptoken")
-   exit()
  env()
