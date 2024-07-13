@@ -1,4 +1,4 @@
-//Sat Jul 13 2024 10:39:14 GMT+0000 (Coordinated Universal Time)
+//Sat Jul 13 2024 16:26:52 GMT+0000 (Coordinated Universal Time)
 //Base:https://github.com/echo094/decode-js
 //Modify:https://github.com/smallfawn/decode_action
 const _0x503289 = _0x2473fd("电信兑换签到话费"),
