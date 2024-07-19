@@ -1,4 +1,4 @@
-#2024-07-18 13:41:07
+#2024-07-19 09:19:35
 import requests
 import time
 import os
@@ -7,7 +7,7 @@ import re
 import random
 import math
 code="可乐阅读"
-ver="1.7"
+ver="1.8"
 envname="yuanshen_klyd"
 split_chars=['@','&','\n']
 debug=False
@@ -61,14 +61,14 @@ class yuanshen:
   r=requests.get(url).json()
   print(f"🎉️检测文章推送结果{r}")
  def getmain(self):
-  headers={"Host":"230640607122241.asfuoqa.cn","Connection":"keep-alive","Upgrade-Insecure-Requests":"1","User-Agent":"Mozilla/5.0 (Linux; Android 14; 23113RKC6C Build/UKQ1.230804.001; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/122.0.6261.120 Mobile Safari/537.36 XWEB/1220133 MMWEBSDK/20240501 MMWEBID/5295 MicroMessenger/8.0.50.2701(0x28003251) WeChat/arm64 Weixin NetType/WIFI Language/zh_CN ABI/arm64","Accept":"text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/wxpic,image/tpg,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7","X-Requested-With":"com.tencent.mm","Accept-Encoding":"gzip, deflate","Accept-Language":"zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7"}
+  headers={"Host":"230640607122241.asfuoqa.cn","Connection":"keep-alive","Upgrade-Insecure-Requests":"1","User-Agent":user_agent,"Accept":"text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/wxpic,image/tpg,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7","X-Requested-With":"com.tencent.mm","Accept-Encoding":"gzip, deflate","Accept-Language":"zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7"}
   url='http://230640607122241.asfuoqa.cn/r?upuid=2306406'
   r=requests.get(url,headers=headers,allow_redirects=False)
   if r.status_code==302:
    j=urlparse(r.headers['Location'])
    self.mainurl=j.netloc
    print(f"获取主域名成功:[{self.mainurl}]")
-   self.headers={"Host":self.mainurl,"Connection":"keep-alive","Accept":"application/json, text/plain, */*","User-Agent":"Mozilla/5.0 (Linux; Android 14; 23113RKC6C Build/UKQ1.230804.001; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/122.0.6261.120 Mobile Safari/537.36 XWEB/1220133 MMWEBSDK/20240501 MMWEBID/5295 MicroMessenger/8.0.50.2701(0x28003251) WeChat/arm64 Weixin NetType/WIFI Language/zh_CN ABI/arm64","X-Requested-With":"XMLHttpRequest","Referer":f"http://{self.mainurl}/new?upuid=2306406","Accept-Encoding":"gzip, deflate","Accept-Language":"zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7"}
+   self.headers={"Host":self.mainurl,"Connection":"keep-alive","Accept":"application/json, text/plain, */*","User-Agent":user_agent,"X-Requested-With":"XMLHttpRequest","Referer":f"http://{self.mainurl}/new?upuid=2306406","Accept-Encoding":"gzip, deflate","Accept-Language":"zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7"}
   else:
    print('获取主域名失败')
    exit()
@@ -91,9 +91,9 @@ class yuanshen:
   self.domain_url=j.netloc
   print(f"获取域名成功:[{self.domain_url}][{self.iu}]")
   time.sleep(2)
-  h={"Host":self.domain_url,"Connection":"keep-alive","Upgrade-Insecure-Requests":"1","User-Agent":"Mozilla/5.0 (Linux; Android 14; 23113RKC6C Build/UKQ1.230804.001; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/122.0.6261.120 Mobile Safari/537.36 XWEB/1220133 MMWEBSDK/20240404 MMWEBID/5295 MicroMessenger/8.0.49.2600(0x2800315A) WeChat/arm64 Weixin NetType/WIFI Language/zh_CN ABI/arm64","Accept":"text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/wxpic,image/tpg,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7","X-Requested-With":"com.tencent.mm","Accept-Encoding":"gzip, deflate","Accept-Language":"zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7"}
+  h={"Host":self.domain_url,"Connection":"keep-alive","Upgrade-Insecure-Requests":"1","User-Agent":user_agent,"Accept":"text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/wxpic,image/tpg,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7","X-Requested-With":"com.tencent.mm","Accept-Encoding":"gzip, deflate","Accept-Language":"zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7"}
   r=requests.get(self.domain,headers=h,allow_redirects=False)
-  match=re.search(r"var dr_url = '(.*)'",r.text)
+  match=re.search(r"var url = '(.*)'",r.text)
   if match:
    self.canshu=match.group(1)
    print("Get 阅读参数----Ok!")
@@ -103,7 +103,7 @@ class yuanshen:
   print("="*30)
   return True
  def read(self):
-  self.readh2={"Host":self.domain_url,"Connection":"keep-alive","Accept":"application/json, text/plain, */*","User-Agent":"Mozilla/5.0 (Linux; Android 14; 23113RKC6C Build/UKQ1.230804.001; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/122.0.6261.120 Mobile Safari/537.36 XWEB/1220133 MMWEBSDK/20240301 MMWEBID/5295 MicroMessenger/8.0.48.2580(0x28003035) WeChat/arm64 Weixin NetType/WIFI Language/zh_CN ABI/arm64","X-Requested-With":"com.tencent.mm","Referer":f"http:/{self.domain_url}/dodoaa/ttdd/","Accept-Encoding":"gzip, deflate","Accept-Language":"zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7"}
+  self.readh2={"Host":"m.zzyi4cf7z8.cn","Connection":"keep-alive","sec-ch-ua":"Chromium;v=122, Not(A:Brand;v=24, Android","X-Requested-With":"XMLHttpRequest","sec-ch-ua-mobile":"?1","User-Agent":user_agent,"sec-ch-ua-platform":"Android","Accept":"*/*","Origin":f"http://{self.domain_url}","Sec-Fetch-Site":"cross-site","Sec-Fetch-Mode":"cors","Sec-Fetch-Dest":"empty","Referer":f"http://{self.domain_url}/","Accept-Encoding":"gzip, deflate, br","Accept-Language":"zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7"}
   print(f"今日已读:[{self.today_num}]篇文章")
   jkey=None
   time.sleep(random.randint(2,5))
@@ -111,13 +111,16 @@ class yuanshen:
    self.today_num+=1
    r=random.random()
    if jkey is None:
-    url=f"http://{self.domain_url}{self.canshu}?iu={self.iu}&pageshow&t={r}"
+    url=f"{self.canshu}?iu={self.iu}&pageshow&r={r}"
    else:
-    url=f"http://{self.domain_url}{self.canshu}?iu={self.iu}&pageshow&t={r}&jkey={jkey}"
+    url=f"{self.canshu}?iu={self.iu}&pageshow&r={r}&jkey={jkey}"
    r=requests.get(url,headers=self.readh2).json()
    try:
     jkey=r["jkey"]
     self.readurl=r['url']
+    if r['url']is None:
+     print(f"未返回有效文章url")
+     return
    except:
     print(f"获取文章链接失败[{r}]")
     break
@@ -159,6 +162,7 @@ class yuanshen:
   time.sleep(random.randint(2,5))
   if self.getdomain():
    self.read()
+  print("="*40)
   self.userinfo()
 if __name__=='__main__':
  appToken=''
@@ -172,4 +176,8 @@ if __name__=='__main__':
   if not appToken or not topicIds:
    print("❌你还没有设置推送,请设置环境变量:yuanshen_topicid和yuanshen_apptoken")
    exit()
+ user_agent=os.getenv('yuanshen_useragent')
+ if not user_agent:
+  print("❌你还没有设置user_agent,请设置环境变量:yuanshen_useragent")
+  exit()
  env()
