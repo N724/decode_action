@@ -1,4 +1,4 @@
-//Tue Aug 20 2024 03:26:48 GMT+0000 (Coordinated Universal Time)
+//Tue Aug 20 2024 13:10:46 GMT+0000 (Coordinated Universal Time)
 //Base:https://github.com/echo094/decode-js
 //Modify:https://github.com/smallfawn/decode_action
 const _0x5f00b5 = _0x5b30bc("太平通"),
