@@ -1,69 +1,83 @@
-#2024-08-20 19:57:21
-import json 
-import os 
-import requests 
-def get_id(OO00O00OOO0OOOOO0,OOO000OOO00O0O000):
- O000OOO000OOO0000={"Accept":"*/*","Accept-Encoding":"gzip, deflate, br","Accept-Language":"zh-CN,zh;q=0.9","Connection":"keep-alive","Content-Length":"45","Content-Type":"application/x-www-form-urlencoded","Host":"mili.shensemiao.com","Referer":"https://servicewechat.com/wxec97c88d99c5d385/1/page-frame.html","Sec-Fetch-Dest":"empty","Sec-Fetch-Mode":"cors","Sec-Fetch-Site":"cross-site","User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36 MicroMessenger/7.0.20.1781(0x6700143B) NetType/WIFI MiniProgramEnv/Windows WindowsWechat/WMPF WindowsWechat(0x63090b19)XWEB/11177","xweb_xhr":"1"}
- OO0O0O00OOOOOO0OO={"v":"1","appid":"4","appsecret":"PHPCMF19F5DF41B263B","":"","api_auth_code":f"{OO00O00OOO0OOOOO0}","api_auth_uid":f"{OOO000OOO00O0O000}","s":"Yhxcx","c":"home","m":"fb_list"}
- O0O0O00OO0OOO0O00='page=1&limit=10&fblx=1&city=&gwfl=-1&search=1'
- O0OOO00OO0OO0OOOO=requests.post('https://mili.shensemiao.com/index.php',headers=O000OOO000OOO0000,params=OO0O0O00OOOOOO0OO,data=O0O0O00OO0OOO0O00)
- if O0OOO00OO0OO0OOOO.status_code==200:
-  O0OOO00OO0OO0OOOO=O0OOO00OO0OO0OOOO.json()
-  if O0OOO00OO0OO0OOOO['data']['list'][0]['id']:
-   return O0OOO00OO0OO0OOOO['data']['list'][0]['id'],O0OOO00OO0OO0OOOO['data']['list'][1]['id']
-  else:
-   return None 
-def browse(O0OO0OOO0OOO0OO0O,O00OO0OO00O0OO0OO,OOO00OOO0O00O000O,t=0):
- OO0000OO000OO0O0O={"Accept":"*/*","Accept-Encoding":"gzip, deflate, br","Accept-Language":"zh-CN,zh;q=0.9","Connection":"keep-alive","Content-Length":"43","Content-Type":"application/x-www-form-urlencoded","Host":"mili.shensemiao.com","Referer":"https://servicewechat.com/wxec97c88d99c5d385/1/page-frame.html","Sec-Fetch-Dest":"empty","Sec-Fetch-Mode":"cors","Sec-Fetch-Site":"cross-site","User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36 MicroMessenger/7.0.20.1781(0x6700143B) NetType/WIFI MiniProgramEnv/Windows WindowsWechat/WMPF WindowsWechat(0x63090b19)XWEB/11177","xweb_xhr":"1"}
- OO00OOOO0O000OO00={"v":"1","appid":"4","appsecret":"PHPCMF19F5DF41B263B","":"","api_auth_code":f"{O0OO0OOO0OOO0OO0O}","api_auth_uid":f"{O00OO0OO00O0OO0OO}","s":"member","app":"Yhxcx","c":"qd","m":"sign_in"}
- O0OO00O0000O00OO0=f'id={OOO00OOO0O00O000O}&fblx=1&wcs={t}&theway=signin&search=1'
- O0000OOOO00OO00O0=requests.post('https://mili.shensemiao.com/index.php',headers=OO0000OO000OO0O0O,params=OO00OOOO0O000OO00,data=O0OO00O0000O00OO0)
- if O0000OOOO00OO00O0.status_code==200:
-  try:
-   O0000OOOO00OO00O0=O0000OOOO00OO00O0.json()
-   print(O0000OOOO00OO00O0)
-   if 'llurl'in O0000OOOO00OO00O0.get('data',{}):
-    O0OO000OO000OOO00=O0000OOOO00OO00O0['data']['llurl']
-    OO0O000OO000O0OO0=O0OO000OO000OOO00.split("id=")[-1]
-    return OO0O000OO000O0OO0 
-   else:
-    print(O0000OOOO00OO00O0)
-  except Exception as O0000OOOO0OO0OO0O:
-   print(O0000OOOO0OO0OO0O)
-def print_ascii_art():
- print("// ┏┓   ┏┓")
- print("// ┏┛┻━━━┛┻┓")
- print("// ┃       ┃")
- print("// ┃   ━   ┃")
- print("// ┃ ┳┛ ┗┳ ┃")
- print("// ┃       ┃")
- print("// ┃   ┻   ┃")
- print("// ┃       ┃")
- print("// ┗━┓   ┏━┛")
- print("// ┃   ┃ 分享群：")
- print("// ┃   ┃ 780261548")
- print("// ┃   ┗━━━┓")
- print("// ┃       ┣┓")
- print("// ┃       ┏┛")
- print("// ┗┓┓┏━┳┓┏┛")
- print("// ┃┫┫ ┃┫┫")
- print("// ┗┻┛ ┗┻┛")
-if __name__=='__main__':
- print_ascii_art()
- ck=os.getenv("ddjz")
- if ck:
-  if "&"in ck:
-   ck=ck.split("&")
-  else:
-   ck=ck.split(" ")
-  for i in ck:
-   user,api_auth_code,api_auth_uid=i.split("#")
-   print("当前账号{}".format(user))
-   print("="*10)
-   id=get_id(api_auth_code,api_auth_uid)
-   if id:
-    browse(api_auth_code,api_auth_uid,id[0])
-    browse(api_auth_code,api_auth_uid,id[1],t=1)
-   print("="*10)
- else:
-  print("变量不存在")
+#2024-08-23 10:30:01
+import os
+import random
+import time
+import requests
+from urllib.parse import urlparse, parse_qs
+
+exec
+
+def get_parameter_value(url, parameter_name):
+    # 解析URL
+    parsed_url = urlparse(url)
+    # 获取查询字符串并将其解析为字典
+    query_params = parse_qs(parsed_url.query)
+    # 尝试获取参数值
+    value = query_params.get(parameter_name)
+    # 如果参数存在，则返回第一个值；否则返回None
+    return value[0] if value else None
+
+
+def getllurl(full_url):
+    headers = {
+        'Content-Type': 'application/x-www-form-urlencoded'
+    }
+    response = requests.post(full_url, headers)
+    if response.json()['code'] == 1:
+        if response.json()['data']['is_sign'] == True:
+            print("已签到")
+            return None
+        else:
+            return response.json()['data']['llurl']
+    return None
+
+
+def sign_in(full_url, ll_url, fb_url, wcs):
+    headers = {
+        'Content-Type': 'application/x-www-form-urlencoded'
+    }
+    id = get_parameter_value(ll_url, 'id')
+    patternid = get_parameter_value(ll_url, 'patternid')
+    fb_data = {
+        'id': id,
+        'patternid': patternid,
+        'wcs': wcs,
+        'pattern': 'signin'
+    }
+    fb_res = requests.post(fb_url, data=fb_data, headers=headers)
+    print(fb_res.json()['msg'])
+    post_data = {
+        'id': id,
+        'fblx': 1,
+        'wcs': wcs,
+        'theway': 'signin',
+        'search': 1
+    }
+    time.sleep(random.randint(15, 30))
+    response = requests.post(full_url, data=post_data, headers=headers)
+    return response.json()
+
+
+def main():
+    accounts = os.getenv("ddjz", "").splitlines()
+    print("☞☞☞ 点点兼职每日签到 ☜☜☜")
+    for account in accounts:
+        remark, auth_code, uid = account.split("#")
+        full_url = f"https://mili.shensemiao.com/index.php?v=1&appid=4&appsecret=PHPCMF19F5DF41B263B&api_auth_code={auth_code}&api_auth_uid={uid}&&s=member&app=Yhxcx&c=qd&m=sign_in"
+        fb_url = f'https://mili.shensemiao.com/index.php?v=1&appid=4&appsecret=PHPCMF19F5DF41B263B&&api_auth_code={auth_code}&api_auth_uid={uid}&&s=Yhxcx&c=home&m=fb_detail'
+        print(f'开始执行账号：{remark}')
+        llurl = getllurl(full_url)
+        if not llurl:
+            continue
+        wcs = get_parameter_value(llurl, 'wcs')
+        result = sign_in(full_url, llurl, fb_url, wcs)
+        print(f"第{int(wcs) + 1}次浏览：{result}")
+        if result['data']['llurl']:
+            llurl = result['data']['llurl']
+            wcs = get_parameter_value(llurl, 'wcs')
+            result = sign_in(full_url, llurl, fb_url, wcs)
+            print(f"第{int(wcs) + 1}次浏览：{result}")
+
+
+if __name__ == "__main__":
+    main()
