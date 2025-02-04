@@ -1,26 +1,33 @@
-# -*- coding: utf-8 -*-
-import zlib, base64, marshal, hashlib
-
-
-def xor_decrypt(data: bytes, key: str) -> bytes:
-    key_bytes = key.encode()
-    return bytes(a ^ key_bytes[i % len(key_bytes)] for i, a in enumerate(data))
-
-
-def decrypt():
-    data = "7rc*bFEW0g3n%EMAOoYaB-e#kc49Fp)}ly6qX#Qn8paEm!saXAW6}!#xL_7_cT?PU6Tu@<Wb12vxf@zb=s=9u>AArcp4_4Roz(S%AO8Qu0cz$!xQGF3;rrJB&|4c+TBj?2@1c^2vZT7bBHW+YGn4(t%@As&mB{#MWyi7n2Y!GXFY(og%bz=e_BIcX#u_+O)AXk~l9nAj3ua59Ugl7L!M<N5j=5N$rJ`$VpKPa(VkrSYIK9&2Z|j-_O_-H#=Z*5<QI=#VDtzHLTO$Q>`|z_s=5TIt;b+>jU1R_0_glKjHdy=KThl0_O*2Rot;*u7E@-g<oGc6ae(V!_9<|Kogcg|i&3=Q5&tf}oE?s`>CCdz)NPJsZ1}8Pl415YoyDidwL#AqMa&)`iIDkWqmcms(CpkW6j-cZA)vwY05~ZArbio4>3XT=on3#n0ff=NQ40*<1lk}dY8A$b#o#co7?p%}UHl>UO-F)u>095}eUzJBY>aC1}%|`_DgE)&u!Oua%T^44ROqkfPaINEY3k0K$rjGn~yyh?sqq4fsDfyXWLS(lQIulyw+U}Ct3Ncax_TS<3KgYVahKY|L(746u7`Y@4`_);6{qM|<j!JnCB@mmmhp{}3q;!%5sgscDcAJ36vxU;eHEk}e8Q|D(sPt8zgk=5c64=z?T-;8nSb}KLid_mnmOU(*@trY_r_*CD(n(d8(DwAFW-<}`x3;YMls$@PmF_q_$O_ijPiq+%a4e94XHU^`!I!5?j*xtFgpz8_wU~1t=}pq?9Aa9jY-o%sxD(8tBdjy<1uNOsIo^rzj#I{}{i1C<3JxaX9)vU_q&z1;u1|UgSqtoOH8?t6DE%r|UHVhh&8cQEltfR@HFcq1IUJ=WPZXO}K-&F+bV4}bdWLiwf1)1XQ0R2p^h@gN!EnuH*N|I6HgjwH{syFuieEE6$Fv>J70Vo!d4{~{$1>e$`u`6o^Lb1n?h2#KWI}=FS&ZB5(35@Z)PPL>#)j<sBWPlB9`a!>=HMOVoaJMgJFDxk=AKwM3uxkhHXuJ-3ZU%=4QTyTcJ(tz#fIU?%WX0saAq*7NV&h#ka}*+OH=)=@y|5~@@u7DroiM>=xyqpb!&bxR*gXEh@flL)m4ccSn`;DesK!{BMP!=b8{BNX6w$M_jT5CF^(i{r}>2N@Tv#vw%12(1OjAkg<rUdOeyI;TUe9p_PNB>!c~YS@D)PtMd0N|T$>iK#-G(szOS*rcgK)y%)B)?w({qyOA@uwutcvnGImOW_p&wX9amJ(uq*;y5O@?4qji;X%81^B@|Y>%n?9-ivSqIUZMVR?%9FB9=hi7m51ia2>Zm?TGxFIc7|9uw_ehB3HDLJxIFDd`MSIZ|AEp0Ek+jVd<>RRh$hG&|?z5vV65+$XxRSSkRb6Gv3~jqCn4FTC_z~!wv=e3Wjq-WLpJ(|_25D#c&yp&-hAAkW_uHko3TNc*4WExh_h5+@W3#lr3lyy`i-hGnlml17H6o%)QWo~VT_GE|K7JmwUogFvu*8x;-TuVJZDm0P!?kL?$ezYiYFG7vOmsj2^_6Z5Iend0qy=R@{11x!MqF&UMGBE2+N4o{e?T;}08ylfR6evPW+{k78+N5^eIOck&c*SE9wXh5v!|D9kK1@<RSIu#9?PUIt`D{q!x^=Xz^>j#c>`PoL*4|4{V^;bpY89U3%Hu{Lv(o4We#nl$f>aBN{t7-Y3HEbJqhBe^DEvyqoe?}AM|U^pj3~cL)$>a9~6mD*}I(}h@9Y|KU=6~_eh#svxZ1CC>m#NwT;A<vx4!*<Gnp#fx4rcUYY*RJO>F6)Lo-mCHi0p-j8d=+5%^PplVA)>C5Y(+4mqGbk6FPj?Nt64%)!kJ*)9`=Hn;^RH|Ffe+)DiW*=)Qhl*(QIL?_plRzne^oI!<MEt<{;(HdkisxE**@Uc#b**tIEyhh?&Tvn+FFv<7|HCrK5>t1C_Cyp#0dDTHHRXdGTh0imA=&l`DYa#uNRmVlZT#(UcWhv03RtX|73B+e+kvoQoi2oQuz*07$O>nSa^RA3sbMi~sP-#Ek`P4x+lYmJ(Esppev!JxCBw#K=qO#x3F*gq*OBU=<msLh=jvWC?@=8r-k$v^H_d&=5=F@ETLU8g_kz-t@Wf*i*K(K=6>=H%<_H0bo7l4k0{|-9IJbLsO+m`QwHi&v^9bdgk)+-8(et=aZa;5?v9H+`c*;8mBCAI+8b2?RQ%+MHjk+e)RfA=&b$G{eNy;GV?)E3fa{#elj!|ZQ0Rbt)!q3Fe+Rb&oZ#guaa|U*YDZH)2R?Hk$uA8@J*$A|~E3ahW`s0}R5A<x4_9Do-l(L`9qMpo|hRCk~;fFTwp?IUb;^fx()l8()`0>AVRE?_EM;7X{bJkew;`n7f+UqTOxsl@N#IbB2gJ1;T`Th#+zRU)#t4r-JT?`FJE{ujejm(QLB>F#-v6g|Xt|L&##@1|ww+*Ul^xm!Ajl0FDBjs$))Q~=oh7xAOf63k|&B<z6Yb~Y{1og6mf6Hb}K%mA@6i4EI)G&zV(*HnmYO0Ir0+DQ60&}(1CekC*z&D>gS-Q_s!z<aEF!yw#ob%l9R7Dhh7(0%%{<)jiK`}*H)EnU55gAef&uYn9cD*Q3Z{X)wc~<Vi<s^(5ciqNPN-ov+#R37XCA&~PB#fRGFCB$|^o9Bp<KM1ekJLD*l^(XD!!-&8j}3{r6=R&d8=Z~ZNM2GejGc9F`+o3pFzde_u=LPMov-~Yor-W8g=|!C4D&x3aa$2G92gY@)6NrT1Vo=Rj|Oo<QA!MO@|f~Z<I*y<hvgdsP8$3Bq%i~N7QwK|o2ySyOoCPQ%Yk6#G2fad<0Lrx-imrc1ut+j7p}Bi0X%9s`Ug7LIxJLJXO+)g9xyl(`deb2a6{V{ZG=7AOU~Wp`Ue8oIxAGTXEkT=@WkwoeBp_~0mvtZ?28GN>+2lZ&oT2!KF;ZbX&=Q~j&L|YbQH~p=U5D}Z3iAMPU^;P_o9z<kcf)A7}Z@xuLX@JO2J&&%gNo#F%R#wvOm!IbTo9X<N;#pZJ?VaRwgZ4AFBbi(iC@Rr=n$dc5AO9QS2+w-WRa(1Ggi2`JUW2F7I}2aOR(*nNRV^#I;Wx;-3)v&Ej97azq#}TXvp|Xff@&Zf?u)=3FA7v4V8r<%o;P(1U57qCnv_?@bUO)e9ZlsdRRbDu0k07_J+7wthQk4N}Fdc>#u;^7m5|j;8u)vr^$fN>xG>r#tk6ocA{<;&beI1SU9Zp7`(sMg^)s3Tb4)!!W-adxdT%*2+r;gGIcK&dwizOl&T22<#D$DjZjj$d)V@$2!F%&LG4z%PJMd#W{x~^Q=VAz#J_bU88H#e4}xfLXP(oEp*G>_=vLx)W~0>eKH~2UCtyx@4Dy6{sz`6SuNjQ+(Zi<mkLzkGC9Q!Qo?Us!gMq$4DI*D$lNp@f|pN+15Lp"
-    key = "ofBtDbeXrhObiKaRSgd5MLS9DbtYx23W"
-    checksum = "007fd6406a7cfb34"
-
-    # Verify checksum
-    if hashlib.sha256(data.encode()).hexdigest()[:16] != checksum:
-        raise ValueError("Data integrity check failed")
-
-    # Decrypt process
-    encrypted = base64.b85decode(data)
-    compressed = xor_decrypt(encrypted, key)
-    marshalled = zlib.decompress(compressed)
-    return marshal.loads(marshalled)
-
-
-exec(decrypt())
+#大大鸣版 霸王茶ji签到 
+#有问题请及时联系大大鸣 v:xolag29638099  （有其他想要的脚本也可以联系，尽量试着写一写）
+# 环境变量 yymbwcj  打开微信小程序抓webapi.qmai.cn里面的qm-user-token(一般在请求头里)填到变量里
+# 可以添加代理 环境变量 PROXY_LIST 用#分隔   ip:port
+#多账号 使用#   例如：账号1#账号2
+#Expecting value: line 1 column 1 (char 0) 报错请求频繁 过段时间重试即可
+#
+#   --------------------------------祈求区--------------------------------
+#                     _ooOoo_
+#                    o8888888o
+#                    88" . "88
+#                    (| -_- |)
+#                     O\ = /O
+#                 ____/`---'\____
+#               .   ' \\| |// `.
+#                / \\||| : |||// \
+#              / _||||| -:- |||||- \
+#                | | \\\ - /// | |
+#              | \_| ''\---/'' | |
+#               \ .-\__ `-` ___/-. /
+#            ___`. .' /--.--\ `. . __
+#         ."" '< `.___\_<|>_/___.' >'"".
+#        | | : `- \`.;`\ _ /`;.`/ - ` : | |
+#          \ \ `-. \_ __\ /__ _/ .-` / /
+#  ======`-.____`-.___\_____/___.-`____.-'======
+#                     `=---='
+# 
+#  .............................................
+#           佛祖保佑             永无BUG
+#           佛祖镇楼             BUG辟邪
+#   --------------------------------代码区--------------------------------
+import zlib,base64,marshal
+exec(marshal.loads(zlib.decompress(base64.b64decode(b'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'))))
